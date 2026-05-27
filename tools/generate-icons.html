@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>PWA 아이콘 생성기 — 스이카 모찌&디저트</title>
+<style>
+  body { font-family: 'Quicksand', sans-serif; background: #FFF6EC; padding: 32px; color: #4A3A2C; }
+  h1 { color: #FF8FA3; }
+  button {
+    background: #FF8FA3; color: white; border: none; padding: 12px 24px;
+    border-radius: 8px; font-size: 16px; cursor: pointer; margin: 8px 4px;
+    font-weight: 700;
+  }
+  button:hover { background: #E06A82; }
+  .preview { display: flex; gap: 16px; flex-wrap: wrap; margin: 24px 0; }
+  .preview > div { text-align: center; }
+  .preview canvas { background: white; border: 2px solid #E8C8A8; border-radius: 12px; }
+  .preview span { display: block; margin-top: 4px; font-size: 12px; color: #9A8676; }
+  .note { background: #FFF; padding: 16px; border-radius: 12px; border: 1px solid #E8C8A8; max-width: 700px; }
+  code { background: #FDE9D9; padding: 2px 6px; border-radius: 4px; }
+</style>
+</head>
+<body>
+
+<h1>🍰 PWA 아이콘 생성기</h1>
+
+<div class="note">
+  <strong>사용법</strong><br>
+  1. <code>[아이콘 생성 + 다운로드]</code> 버튼 클릭<br>
+  2. 브라우저가 PNG 4개를 자동 다운로드합니다<br>
+  3. 다운로드 폴더에서 PNG 4개를 프로젝트의 <code>icons/</code> 폴더로 옮겨주세요<br>
+  4. 이 페이지는 더 이상 필요 없어요 (배포 시 제외 가능)
+</div>
+
+<button onclick="generateAll()">아이콘 생성 + 다운로드</button>
+
+<div class="preview" id="preview"></div>
+
+<!-- 게임 캐릭터 SVG 정의 (index.html에서 복사) -->
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <radialGradient id="g-mochi-pink" cx="40%" cy="35%"><stop offset="0%" stop-color="#FFE0E8"/><stop offset="100%" stop-color="#FFAFC5"/></radialGradient>
+    <radialGradient id="g-cream" cx="40%" cy="35%"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="100%" stop-color="#FFF0DC"/></radialGradient>
+    <radialGradient id="g-cake-base" cx="40%" cy="35%"><stop offset="0%" stop-color="#FFE8C8"/><stop offset="100%" stop-color="#E8B888"/></radialGradient>
+    <radialGradient id="g-mochi-mint" cx="40%" cy="35%"><stop offset="0%" stop-color="#E0F5E8"/><stop offset="100%" stop-color="#9CDDB8"/></radialGradient>
+    <radialGradient id="g-berry" cx="40%" cy="35%"><stop offset="0%" stop-color="#FF8FA3"/><stop offset="100%" stop-color="#D63A56"/></radialGradient>
+  </defs>
+</svg>
+
+<script>
+// 3단 케이크 SVG (index.html의 m-king 심볼 — 게임 최종 목표 아이콘)
+const KING_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <radialGradient id="g-mochi-pink" cx="40%" cy="35%"><stop offset="0%" stop-color="#FFE0E8"/><stop offset="100%" stop-color="#FFAFC5"/></radialGradient>
+    <radialGradient id="g-cream" cx="40%" cy="35%"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="100%" stop-color="#FFF0DC"/></radialGradient>
+    <radialGradient id="g-cake-base" cx="40%" cy="35%"><stop offset="0%" stop-color="#FFE8C8"/><stop offset="100%" stop-color="#E8B888"/></radialGradient>
+    <radialGradient id="g-mochi-mint" cx="40%" cy="35%"><stop offset="0%" stop-color="#E0F5E8"/><stop offset="100%" stop-color="#9CDDB8"/></radialGradient>
+    <radialGradient id="g-berry" cx="40%" cy="35%"><stop offset="0%" stop-color="#FF8FA3"/><stop offset="100%" stop-color="#D63A56"/></radialGradient>
+  </defs>
+  <ellipse cx="50" cy="96" rx="48" ry="4" fill="#A66A30"/>
+  <rect x="2" y="72" width="96" height="24" fill="url(#g-mochi-pink)"/>
+  <ellipse cx="50" cy="72" rx="48" ry="4" fill="url(#g-cream)"/>
+  <rect x="14" y="48" width="72" height="24" fill="url(#g-cake-base)"/>
+  <ellipse cx="50" cy="48" rx="36" ry="4" fill="url(#g-cream)"/>
+  <rect x="28" y="24" width="44" height="24" fill="url(#g-mochi-mint)"/>
+  <ellipse cx="50" cy="24" rx="22" ry="4" fill="url(#g-cream)"/>
+  <path d="M 28 24 Q 32 30 28 32 Q 34 32 38 28 Q 42 34 46 28 Q 50 34 54 28 Q 58 34 62 28 Q 66 32 72 32 Q 68 30 72 24 Z" fill="url(#g-cream)"/>
+  <path d="M 38 14 L 42 6 L 50 12 L 58 6 L 62 14 Z" fill="#FFD86B" stroke="#E8B848" stroke-width="1"/>
+  <circle cx="42" cy="8" r="1.5" fill="#FF5B7A"/>
+  <circle cx="50" cy="14" r="1.5" fill="#7AC59A"/>
+  <circle cx="58" cy="8" r="1.5" fill="#B89AE8"/>
+  <circle cx="38" cy="84" r="4" fill="#3A2418"/>
+  <circle cx="62" cy="84" r="4" fill="#3A2418"/>
+  <circle cx="39" cy="83" r="1.4" fill="white"/>
+  <circle cx="63" cy="83" r="1.4" fill="white"/>
+  <ellipse cx="28" cy="90" rx="4" ry="2.5" fill="#FF5B7A" opacity="0.5"/>
+  <ellipse cx="72" cy="90" rx="4" ry="2.5" fill="#FF5B7A" opacity="0.5"/>
+  <path d="M 44 88 Q 50 92 56 88" fill="none" stroke="#3A2418" stroke-width="2" stroke-linecap="round"/>
+</svg>`;
+
+// 배경 포함 캔버스 렌더링
+function renderIcon(size, opts = {}) {
+  const { padding = 0.1, maskable = false } = opts;
+  const canvas = document.createElement('canvas');
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext('2d');
+
+  // 배경: 둥근 사각형 (maskable은 안전 영역 고려)
+  if (maskable) {
+    // maskable: 전체 면을 채우고 안쪽에 그림 — safe zone 80%
+    ctx.fillStyle = '#FFD0DC';
+    ctx.fillRect(0, 0, size, size);
+  } else {
+    // 일반 아이콘: 둥근 사각형 배경
+    const r = size * 0.22;
+    ctx.fillStyle = '#FFE6F2';
+    roundRect(ctx, 0, 0, size, size, r);
+    ctx.fill();
+  }
+
+  // SVG → 이미지
+  return new Promise((resolve) => {
+    const img = new Image();
+    const blob = new Blob([KING_SVG], { type: 'image/svg+xml;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    img.onload = () => {
+      const pad = maskable ? size * 0.2 : size * padding;
+      const drawSize = size - pad * 2;
+      ctx.drawImage(img, pad, pad, drawSize, drawSize);
+      URL.revokeObjectURL(url);
+      resolve(canvas);
+    };
+    img.src = url;
+  });
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+
+function downloadCanvas(canvas, filename) {
+  canvas.toBlob((blob) => {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }, 'image/png');
+}
+
+async function generateAll() {
+  const preview = document.getElementById('preview');
+  preview.innerHTML = '';
+
+  const targets = [
+    { size: 192, name: 'icon-192.png', maskable: false },
+    { size: 512, name: 'icon-512.png', maskable: false },
+    { size: 512, name: 'icon-maskable-512.png', maskable: true },
+    { size: 180, name: 'apple-touch-icon.png', maskable: false },
+  ];
+
+  for (const t of targets) {
+    const canvas = await renderIcon(t.size, { maskable: t.maskable });
+    // 미리보기 (작게)
+    const previewCanvas = document.createElement('canvas');
+    previewCanvas.width = 128;
+    previewCanvas.height = 128;
+    previewCanvas.getContext('2d').drawImage(canvas, 0, 0, 128, 128);
+
+    const wrapper = document.createElement('div');
+    wrapper.appendChild(previewCanvas);
+    const label = document.createElement('span');
+    label.textContent = t.name + ' (' + t.size + 'px)';
+    wrapper.appendChild(label);
+    preview.appendChild(wrapper);
+
+    // 다운로드 (약간 간격을 둬서 브라우저가 차단하지 않게)
+    await new Promise((r) => setTimeout(r, 200));
+    downloadCanvas(canvas, t.name);
+  }
+}
+</script>
+</body>
+</html>

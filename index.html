@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>스이카: 모찌&디저트</title>
+
+  <!-- PWA 메타데이터 -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#FF8FA3">
+  <meta name="description" content="말랑말랑 통통 튀는 머지 퍼즐 게임">
+
+  <!-- iOS 홈 화면 추가 시 풀스크린 동작 -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="모찌 디저트">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ==========================================
+     SVG 디저트 캐릭터 정의 (시안 mockup.html 기반)
+     도감·미리보기·메인화면 떠다니는 모찌에 use 참조
+     ========================================== -->
+<svg class="svg-defs" aria-hidden="true">
+  <defs>
+    <radialGradient id="g-mochi-white" cx="40%" cy="35%"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="100%" stop-color="#F2EAE0"/></radialGradient>
+    <radialGradient id="g-mochi-pink" cx="40%" cy="35%"><stop offset="0%" stop-color="#FFE0E8"/><stop offset="100%" stop-color="#FFAFC5"/></radialGradient>
+    <radialGradient id="g-mochi-mint" cx="40%" cy="35%"><stop offset="0%" stop-color="#E0F5E8"/><stop offset="100%" stop-color="#9CDDB8"/></radialGradient>
+    <radialGradient id="g-mac-yellow" cx="40%" cy="35%"><stop offset="0%" stop-color="#FFF5C8"/><stop offset="100%" stop-color="#FFD86B"/></radialGradient>
+    <radialGradient id="g-mac-lavender" cx="40%" cy="35%"><stop offset="0%" stop-color="#EAD9FF"/><stop offset="100%" stop-color="#B89AE8"/></radialGradient>
+    <radialGradient id="g-donut" cx="40%" cy="35%"><stop offset="0%" stop-color="#FFD0DC"/><stop offset="100%" stop-color="#FF8FB0"/></radialGradient>
+    <radialGradient id="g-donut-base" cx="40%" cy="35%"><stop offset="0%" stop-color="#F0D4A8"/><stop offset="100%" stop-color="#C99670"/></radialGradient>
+    <radialGradient id="g-pudding" cx="40%" cy="35%"><stop offset="0%" stop-color="#FFE8A8"/><stop offset="100%" stop-color="#E8B860"/></radialGradient>
+    <radialGradient id="g-cream" cx="40%" cy="35%"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="100%" stop-color="#FFF0DC"/></radialGradient>
+    <radialGradient id="g-cake-base" cx="40%" cy="35%"><stop offset="0%" stop-color="#FFE8C8"/><stop offset="100%" stop-color="#E8B888"/></radialGradient>
+    <radialGradient id="g-cake-choco" cx="40%" cy="35%"><stop offset="0%" stop-color="#A66A48"/><stop offset="100%" stop-color="#6B3A20"/></radialGradient>
+    <radialGradient id="g-berry" cx="40%" cy="35%"><stop offset="0%" stop-color="#FF8FA3"/><stop offset="100%" stop-color="#D63A56"/></radialGradient>
+  </defs>
+
+  <!-- 1. 흰 모찌 -->
+  <symbol id="m-white" viewBox="0 0 100 100">
+    <ellipse cx="50" cy="56" rx="38" ry="34" fill="url(#g-mochi-white)" stroke="#E8DCC8" stroke-width="1.5"/>
+    <ellipse cx="50" cy="40" rx="30" ry="6" fill="white" opacity="0.6"/>
+    <circle cx="36" cy="56" r="5" fill="#3A2418"/>
+    <circle cx="64" cy="56" r="5" fill="#3A2418"/>
+    <circle cx="38" cy="54" r="1.8" fill="white"/>
+    <circle cx="66" cy="54" r="1.8" fill="white"/>
+    <ellipse cx="26" cy="64" rx="5" ry="3.2" fill="#FF8FA3" opacity="0.55"/>
+    <ellipse cx="74" cy="64" rx="5" ry="3.2" fill="#FF8FA3" opacity="0.55"/>
+    <path d="M 44 66 Q 50 70 56 66" fill="none" stroke="#3A2418" stroke-width="2" stroke-linecap="round"/>
+  </symbol>
+
+  <!-- 2. 딸기 모찌 -->
+  <symbol id="m-pink" viewBox="0 0 100 100">
+    <ellipse cx="50" cy="56" rx="40" ry="36" fill="url(#g-mochi-pink)" stroke="#FF9FB8" stroke-width="1.5"/>
+    <ellipse cx="50" cy="40" rx="32" ry="6" fill="white" opacity="0.5"/>
+    <path d="M 40 16 Q 50 8 60 16 Q 56 26 50 28 Q 44 26 40 16 Z" fill="url(#g-berry)"/>
+    <path d="M 42 14 Q 50 8 58 14 L 56 18 L 54 14 L 50 18 L 46 14 L 44 18 Z" fill="#5A9B3A"/>
+    <circle cx="36" cy="56" r="5" fill="#3A2418"/>
+    <circle cx="64" cy="56" r="5" fill="#3A2418"/>
+    <circle cx="38" cy="54" r="1.8" fill="white"/>
+    <circle cx="66" cy="54" r="1.8" fill="white"/>
+    <ellipse cx="26" cy="64" rx="5.5" ry="3.5" fill="#FF5B7A" opacity="0.5"/>
+    <ellipse cx="74" cy="64" rx="5.5" ry="3.5" fill="#FF5B7A" opacity="0.5"/>
+    <path d="M 44 66 Q 50 72 56 66" fill="none" stroke="#3A2418" stroke-width="2.2" stroke-linecap="round"/>
+  </symbol>
+
+  <!-- 3. 말차 모찌 -->
+  <symbol id="m-mint" viewBox="0 0 100 100">
+    <ellipse cx="50" cy="56" rx="40" ry="36" fill="url(#g-mochi-mint)" stroke="#7AC59A" stroke-width="1.5"/>
+    <ellipse cx="50" cy="40" rx="32" ry="6" fill="white" opacity="0.5"/>
+    <path d="M 50 14 Q 38 10 36 18 Q 44 22 50 20 Q 56 22 64 18 Q 62 10 50 14 Z" fill="#5A9B3A"/>
+    <circle cx="36" cy="56" r="5.5" fill="#3A2418"/>
+    <circle cx="64" cy="56" r="5.5" fill="#3A2418"/>
+    <circle cx="38" cy="54" r="2" fill="white"/>
+    <circle cx="66" cy="54" r="2" fill="white"/>
+    <ellipse cx="26" cy="64" rx="5.5" ry="3.5" fill="#FF8FA3" opacity="0.5"/>
+    <ellipse cx="74" cy="64" rx="5.5" ry="3.5" fill="#FF8FA3" opacity="0.5"/>
+    <path d="M 44 66 Q 50 74 56 66 Q 50 70 44 66 Z" fill="#3A2418"/>
+  </symbol>
+
+  <!-- 4. 레몬 마카롱 -->
+  <symbol id="m-mac-y" viewBox="0 0 100 100">
+    <path d="M 14 56 Q 14 78 50 80 Q 86 78 86 56 Z" fill="url(#g-mac-yellow)"/>
+    <rect x="14" y="48" width="72" height="14" fill="#FFF0DC"/>
+    <path d="M 14 50 Q 14 28 50 26 Q 86 28 86 50 Z" fill="url(#g-mac-yellow)"/>
+    <ellipse cx="22" cy="58" rx="4" ry="2" fill="#E8B848" opacity="0.4"/>
+    <ellipse cx="78" cy="58" rx="4" ry="2" fill="#E8B848" opacity="0.4"/>
+    <ellipse cx="50" cy="32" rx="22" ry="4" fill="white" opacity="0.5"/>
+    <circle cx="38" cy="42" r="4.5" fill="#3A2418"/>
+    <circle cx="62" cy="42" r="4.5" fill="#3A2418"/>
+    <circle cx="40" cy="40.5" r="1.6" fill="white"/>
+    <circle cx="64" cy="40.5" r="1.6" fill="white"/>
+    <ellipse cx="28" cy="48" rx="5" ry="3" fill="#FF8FA3" opacity="0.5"/>
+    <ellipse cx="72" cy="48" rx="5" ry="3" fill="#FF8FA3" opacity="0.5"/>
+    <path d="M 46 50 Q 50 53 54 50" fill="none" stroke="#3A2418" stroke-width="2" stroke-linecap="round"/>
+  </symbol>
+
+  <!-- 5. 라벤더 마카롱 -->
+  <symbol id="m-mac-l" viewBox="0 0 100 100">
+    <path d="M 12 56 Q 12 80 50 82 Q 88 80 88 56 Z" fill="url(#g-mac-lavender)"/>
+    <rect x="12" y="48" width="76" height="14" fill="#F5E8DC"/>
+    <path d="M 12 50 Q 12 26 50 24 Q 88 26 88 50 Z" fill="url(#g-mac-lavender)"/>
+    <ellipse cx="22" cy="58" rx="4" ry="2" fill="#9678C0" opacity="0.4"/>
+    <ellipse cx="78" cy="58" rx="4" ry="2" fill="#9678C0" opacity="0.4"/>
+    <ellipse cx="50" cy="30" rx="24" ry="4" fill="white" opacity="0.45"/>
+    <path d="M 50 16 L 52 21 L 57 21 L 53 24 L 55 29 L 50 26 L 45 29 L 47 24 L 43 21 L 48 21 Z" fill="#FFD86B"/>
+    <circle cx="38" cy="40" r="4.5" fill="#3A2418"/>
+    <circle cx="62" cy="40" r="4.5" fill="#3A2418"/>
+    <circle cx="40" cy="38.5" r="1.6" fill="white"/>
+    <circle cx="64" cy="38.5" r="1.6" fill="white"/>
+    <ellipse cx="28" cy="46" rx="5" ry="3" fill="#FF8FA3" opacity="0.5"/>
+    <ellipse cx="72" cy="46" rx="5" ry="3" fill="#FF8FA3" opacity="0.5"/>
+    <path d="M 44 48 Q 50 54 56 48" fill="none" stroke="#3A2418" stroke-width="2.2" stroke-linecap="round"/>
+  </symbol>
+
+  <!-- 6. 도넛 -->
+  <symbol id="m-donut" viewBox="0 0 100 100">
+    <circle cx="50" cy="56" r="42" fill="url(#g-donut-base)"/>
+    <path d="M 50 14 a 42 42 0 0 1 41 50 q -20 -6 -41 -6 q -21 0 -41 6 a 42 42 0 0 1 41 -50 Z" fill="url(#g-donut)"/>
+    <path d="M 14 56 q 4 14 10 18" stroke="#FF8FB0" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.7"/>
+    <path d="M 86 56 q -2 12 -8 18" stroke="#FF8FB0" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.7"/>
+    <circle cx="50" cy="56" r="14" fill="#FFEEF5"/>
+    <circle cx="50" cy="56" r="14" fill="none" stroke="#D8A088" stroke-width="1"/>
+    <rect x="30" y="26" width="2.5" height="6" rx="1" fill="#7AC59A" transform="rotate(20 30 26)"/>
+    <rect x="62" y="22" width="2.5" height="6" rx="1" fill="#FFD86B" transform="rotate(-30 62 22)"/>
+    <rect x="74" y="38" width="2.5" height="6" rx="1" fill="#B89AE8" transform="rotate(60 74 38)"/>
+    <rect x="20" y="44" width="2.5" height="6" rx="1" fill="#FFD86B" transform="rotate(-20 20 44)"/>
+    <rect x="76" y="74" width="2.5" height="6" rx="1" fill="#7AC59A" transform="rotate(40 76 74)"/>
+    <rect x="22" y="78" width="2.5" height="6" rx="1" fill="#B89AE8" transform="rotate(-50 22 78)"/>
+    <rect x="44" y="86" width="2.5" height="6" rx="1" fill="#FFD86B" transform="rotate(10 44 86)"/>
+    <circle cx="28" cy="56" r="4" fill="#3A2418"/>
+    <circle cx="72" cy="56" r="4" fill="#3A2418"/>
+    <circle cx="29" cy="55" r="1.4" fill="white"/>
+    <circle cx="73" cy="55" r="1.4" fill="white"/>
+    <ellipse cx="20" cy="64" rx="4.5" ry="3" fill="#FF5B7A" opacity="0.45"/>
+    <ellipse cx="80" cy="64" rx="4.5" ry="3" fill="#FF5B7A" opacity="0.45"/>
+  </symbol>
+
+  <!-- 7. 푸딩 -->
+  <symbol id="m-pudding" viewBox="0 0 100 100">
+    <path d="M 22 38 Q 22 36 24 36 L 76 36 Q 78 36 78 38 L 84 88 Q 84 92 80 92 L 20 92 Q 16 92 16 88 Z" fill="url(#g-pudding)"/>
+    <ellipse cx="50" cy="36" rx="28" ry="6" fill="#A66A30"/>
+    <ellipse cx="50" cy="34" rx="28" ry="6" fill="#C9853F"/>
+    <path d="M 30 36 q -2 10 0 14" stroke="#A66A30" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.6"/>
+    <path d="M 70 36 q 2 10 0 14" stroke="#A66A30" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.6"/>
+    <ellipse cx="32" cy="60" rx="4" ry="14" fill="#FFF5C8" opacity="0.5"/>
+    <circle cx="38" cy="62" r="5" fill="#3A2418"/>
+    <circle cx="62" cy="62" r="5" fill="#3A2418"/>
+    <circle cx="40" cy="60" r="1.8" fill="white"/>
+    <circle cx="64" cy="60" r="1.8" fill="white"/>
+    <ellipse cx="28" cy="72" rx="5.5" ry="3.5" fill="#FF5B7A" opacity="0.45"/>
+    <ellipse cx="72" cy="72" rx="5.5" ry="3.5" fill="#FF5B7A" opacity="0.45"/>
+    <path d="M 44 74 Q 50 80 56 74" fill="none" stroke="#3A2418" stroke-width="2.2" stroke-linecap="round"/>
+  </symbol>
+
+  <!-- 8. 컵케이크 -->
+  <symbol id="m-cupcake" viewBox="0 0 100 100">
+    <path d="M 22 60 L 78 60 L 72 94 Q 72 96 70 96 L 30 96 Q 28 96 28 94 Z" fill="#FFB8C8"/>
+    <line x1="34" y1="62" x2="32" y2="94" stroke="#E89AAC" stroke-width="1.5"/>
+    <line x1="44" y1="62" x2="43" y2="94" stroke="#E89AAC" stroke-width="1.5"/>
+    <line x1="54" y1="62" x2="54" y2="94" stroke="#E89AAC" stroke-width="1.5"/>
+    <line x1="64" y1="62" x2="65" y2="94" stroke="#E89AAC" stroke-width="1.5"/>
+    <line x1="74" y1="62" x2="76" y2="94" stroke="#E89AAC" stroke-width="1.5"/>
+    <path d="M 18 62 Q 14 50 22 44 Q 16 32 30 28 Q 24 14 42 14 Q 50 4 60 14 Q 76 12 72 26 Q 86 30 80 42 Q 88 50 82 60 Z" fill="url(#g-cream)" stroke="#F0E0CC" stroke-width="1.2"/>
+    <circle cx="50" cy="14" r="6" fill="url(#g-berry)"/>
+    <path d="M 50 8 Q 52 4 56 4" stroke="#5A3A1C" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <circle cx="40" cy="38" r="4" fill="#3A2418"/>
+    <circle cx="60" cy="38" r="4" fill="#3A2418"/>
+    <circle cx="41" cy="37" r="1.4" fill="white"/>
+    <circle cx="61" cy="37" r="1.4" fill="white"/>
+    <ellipse cx="32" cy="46" rx="4" ry="2.5" fill="#FF8FA3" opacity="0.5"/>
+    <ellipse cx="68" cy="46" rx="4" ry="2.5" fill="#FF8FA3" opacity="0.5"/>
+    <path d="M 46 46 Q 50 50 54 46" fill="none" stroke="#3A2418" stroke-width="2" stroke-linecap="round"/>
+  </symbol>
+
+  <!-- 9. 베리 케이크 -->
+  <symbol id="m-mini" viewBox="0 0 100 100">
+    <ellipse cx="50" cy="90" rx="42" ry="6" fill="#D89C70"/>
+    <rect x="8" y="50" width="84" height="40" fill="url(#g-cake-base)"/>
+    <ellipse cx="50" cy="50" rx="42" ry="8" fill="url(#g-cream)"/>
+    <path d="M 8 50 Q 12 60 8 62 Q 14 64 18 56 Q 22 64 26 58 Q 30 66 34 56 Q 38 64 42 58 Q 46 66 50 56 Q 54 66 58 58 Q 62 64 66 56 Q 70 66 74 58 Q 78 64 82 56 Q 86 64 92 62 Q 88 60 92 50 Z" fill="url(#g-cream)"/>
+    <circle cx="22" cy="44" r="6" fill="url(#g-berry)"/>
+    <circle cx="50" cy="42" r="7" fill="url(#g-berry)"/>
+    <circle cx="78" cy="44" r="6" fill="url(#g-berry)"/>
+    <path d="M 50 36 Q 56 32 58 36 Q 54 40 50 38 Z" fill="#5A9B3A"/>
+    <circle cx="38" cy="68" r="4.5" fill="#3A2418"/>
+    <circle cx="62" cy="68" r="4.5" fill="#3A2418"/>
+    <circle cx="40" cy="66.5" r="1.6" fill="white"/>
+    <circle cx="64" cy="66.5" r="1.6" fill="white"/>
+    <ellipse cx="28" cy="76" rx="5" ry="3" fill="#FF8FA3" opacity="0.5"/>
+    <ellipse cx="72" cy="76" rx="5" ry="3" fill="#FF8FA3" opacity="0.5"/>
+    <path d="M 44 76 Q 50 82 56 76" fill="none" stroke="#3A2418" stroke-width="2.2" stroke-linecap="round"/>
+  </symbol>
+
+  <!-- 10. 2단 케이크 -->
+  <symbol id="m-big" viewBox="0 0 100 100">
+    <ellipse cx="50" cy="94" rx="46" ry="5" fill="#B8845C"/>
+    <rect x="4" y="60" width="92" height="36" fill="url(#g-cake-choco)"/>
+    <ellipse cx="50" cy="60" rx="46" ry="6" fill="url(#g-cream)"/>
+    <rect x="4" y="68" width="92" height="3" fill="#FFF0DC" opacity="0.7"/>
+    <rect x="22" y="30" width="56" height="32" fill="url(#g-cake-base)"/>
+    <ellipse cx="50" cy="30" rx="28" ry="5" fill="url(#g-cream)"/>
+    <path d="M 22 30 Q 26 38 22 40 Q 28 42 32 34 Q 36 44 42 36 Q 46 44 50 36 Q 54 44 58 36 Q 64 44 68 34 Q 72 42 78 40 Q 74 38 78 30 Z" fill="url(#g-cream)"/>
+    <circle cx="36" cy="26" r="5" fill="url(#g-berry)"/>
+    <circle cx="50" cy="22" r="6" fill="url(#g-berry)"/>
+    <circle cx="64" cy="26" r="5" fill="url(#g-berry)"/>
+    <path d="M 50 16 Q 56 12 58 16 Q 54 20 50 18 Z" fill="#5A9B3A"/>
+    <circle cx="38" cy="78" r="5" fill="#FFF0DC"/>
+    <circle cx="62" cy="78" r="5" fill="#FFF0DC"/>
+    <circle cx="38" cy="78" r="3.5" fill="#3A2418"/>
+    <circle cx="62" cy="78" r="3.5" fill="#3A2418"/>
+    <circle cx="39" cy="77" r="1.4" fill="white"/>
+    <circle cx="63" cy="77" r="1.4" fill="white"/>
+    <ellipse cx="26" cy="84" rx="5" ry="3" fill="#FF8FA3" opacity="0.5"/>
+    <ellipse cx="74" cy="84" rx="5" ry="3" fill="#FF8FA3" opacity="0.5"/>
+    <path d="M 44 84 Q 50 90 56 84" fill="none" stroke="#FFF0DC" stroke-width="2.5" stroke-linecap="round"/>
+  </symbol>
+
+  <!-- ==========================================
+       광고 4컷 — 모찌 베이커리 신메뉴 (가짜 광고)
+       ========================================== -->
+
+  <!-- AD 컷 1: 가게 오픈! -->
+  <symbol id="ad-shop" viewBox="0 0 400 300">
+    <!-- 하늘 -->
+    <rect width="400" height="200" fill="url(#g-mochi-pink)" opacity="0.4"/>
+    <!-- 구름 -->
+    <ellipse cx="80" cy="40" rx="28" ry="12" fill="white" opacity="0.85"/>
+    <ellipse cx="100" cy="35" rx="22" ry="10" fill="white" opacity="0.85"/>
+    <ellipse cx="310" cy="55" rx="34" ry="14" fill="white" opacity="0.85"/>
+    <!-- 햇살 -->
+    <circle cx="350" cy="35" r="22" fill="#FFD86B" opacity="0.8"/>
+    <g stroke="#FFD86B" stroke-width="2" opacity="0.6">
+      <line x1="350" y1="0" x2="350" y2="12"/>
+      <line x1="350" y1="58" x2="350" y2="70"/>
+      <line x1="315" y1="35" x2="327" y2="35"/>
+      <line x1="373" y1="35" x2="385" y2="35"/>
+    </g>
+    <!-- 땅 -->
+    <rect y="200" width="400" height="100" fill="#F4D2A8"/>
+    <rect y="195" width="400" height="8" fill="#E8B85A"/>
+    <!-- 가게 본체 -->
+    <rect x="80" y="100" width="240" height="105" fill="#FFFBF0" stroke="#E8C8A8" stroke-width="2"/>
+    <!-- 지붕 -->
+    <path d="M 60 105 L 200 50 L 340 105 Z" fill="#FF8FA3" stroke="#E06A82" stroke-width="2"/>
+    <path d="M 70 100 L 200 60 L 330 100" fill="none" stroke="#FFAFC5" stroke-width="2"/>
+    <!-- 간판 -->
+    <rect x="120" y="115" width="160" height="32" rx="6" fill="#FFE6F2" stroke="#E89AAC" stroke-width="1.5"/>
+    <text x="200" y="137" font-family="Gowun Dodum, sans-serif" font-size="15" font-weight="700" fill="#D63A56" text-anchor="middle">모찌 베이커리</text>
+    <!-- 창문 -->
+    <rect x="100" y="160" width="50" height="36" rx="4" fill="#E6F0FF" stroke="#A8C8E8" stroke-width="1.5"/>
+    <rect x="250" y="160" width="50" height="36" rx="4" fill="#E6F0FF" stroke="#A8C8E8" stroke-width="1.5"/>
+    <line x1="125" y1="160" x2="125" y2="196" stroke="#A8C8E8" stroke-width="1"/>
+    <line x1="275" y1="160" x2="275" y2="196" stroke="#A8C8E8" stroke-width="1"/>
+    <!-- 문 -->
+    <rect x="178" y="155" width="44" height="50" rx="3" fill="#A66A48"/>
+    <circle cx="213" cy="180" r="2" fill="#FFD86B"/>
+    <!-- 오픈 깃발 -->
+    <rect x="330" y="80" width="3" height="60" fill="#5A3A1C"/>
+    <path d="M 333 80 L 365 88 L 333 96 Z" fill="#FF5B7A"/>
+    <text x="346" y="92" font-family="Gowun Dodum" font-size="9" font-weight="700" fill="white" text-anchor="middle">OPEN</text>
+    <!-- OPEN 큰 글씨 -->
+    <text x="200" y="265" font-family="Gowun Dodum" font-size="34" font-weight="700" fill="#FF5B7A" text-anchor="middle">🎉 OPEN! 🎉</text>
+  </symbol>
+
+  <!-- AD 컷 2: 신메뉴 무지개 모찌 -->
+  <symbol id="ad-newitem" viewBox="0 0 400 300">
+    <rect width="400" height="300" fill="#FFF5F8"/>
+    <!-- 반짝이 배경 -->
+    <g opacity="0.6">
+      <circle cx="50" cy="40" r="3" fill="#FFD86B"/>
+      <circle cx="350" cy="60" r="4" fill="#FF8FA3"/>
+      <circle cx="80" cy="240" r="3" fill="#B89AE8"/>
+      <circle cx="330" cy="220" r="4" fill="#7AC59A"/>
+      <path d="M 40 100 L 44 108 L 52 108 L 46 114 L 48 122 L 40 117 L 32 122 L 34 114 L 28 108 L 36 108 Z" fill="#FFD86B"/>
+      <path d="M 360 180 L 364 188 L 372 188 L 366 194 L 368 202 L 360 197 L 352 202 L 354 194 L 348 188 L 356 188 Z" fill="#FF8FA3"/>
+    </g>
+    <!-- 제목 -->
+    <text x="200" y="50" font-family="Gowun Dodum" font-size="26" font-weight="700" fill="#D63A56" text-anchor="middle">✨ 신메뉴 출시 ✨</text>
+    <!-- 무지개 모찌 (큼지막한 일러스트) -->
+    <g transform="translate(200 170)">
+      <ellipse cx="0" cy="50" rx="80" ry="14" fill="rgba(120,80,50,0.15)"/>
+      <!-- 무지개 층 -->
+      <path d="M -75 5 Q -75 -70 0 -70 Q 75 -70 75 5 Z" fill="#FF8FA3"/>
+      <path d="M -65 5 Q -65 -60 0 -60 Q 65 -60 65 5 Z" fill="#FFD86B"/>
+      <path d="M -55 5 Q -55 -50 0 -50 Q 55 -50 55 5 Z" fill="#7AC59A"/>
+      <path d="M -45 5 Q -45 -40 0 -40 Q 45 -40 45 5 Z" fill="#A8C8E8"/>
+      <path d="M -35 5 Q -35 -30 0 -30 Q 35 -30 35 5 Z" fill="#B89AE8"/>
+      <ellipse cx="0" cy="5" rx="78" ry="32" fill="url(#g-cream)"/>
+      <!-- 표정 -->
+      <circle cx="-20" cy="0" r="5" fill="#3A2418"/>
+      <circle cx="20" cy="0" r="5" fill="#3A2418"/>
+      <circle cx="-18" cy="-2" r="1.6" fill="white"/>
+      <circle cx="22" cy="-2" r="1.6" fill="white"/>
+      <ellipse cx="-32" cy="10" rx="6" ry="3.5" fill="#FF5B7A" opacity="0.5"/>
+      <ellipse cx="32" cy="10" rx="6" ry="3.5" fill="#FF5B7A" opacity="0.5"/>
+      <path d="M -10 10 Q 0 18 10 10" fill="none" stroke="#3A2418" stroke-width="2.5" stroke-linecap="round"/>
+      <!-- 별 토핑 -->
+      <path d="M 0 -75 L 4 -67 L 12 -67 L 6 -62 L 8 -54 L 0 -59 L -8 -54 L -6 -62 L -12 -67 L -4 -67 Z" fill="#FFD86B" stroke="#E8B848"/>
+    </g>
+    <!-- 이름 -->
+    <text x="200" y="260" font-family="Gowun Dodum" font-size="22" font-weight="700" fill="#4A3A2C" text-anchor="middle">🌈 무지개 모찌</text>
+    <text x="200" y="284" font-family="Gowun Dodum" font-size="13" fill="#9A8676" text-anchor="middle">다섯 가지 맛이 한 입에!</text>
+  </symbol>
+
+  <!-- AD 컷 3: 행복한 손님들 -->
+  <symbol id="ad-happy" viewBox="0 0 400 300">
+    <rect width="400" height="300" fill="#FFF8EC"/>
+    <!-- 가게 안 인테리어 -->
+    <rect y="180" width="400" height="120" fill="#F4D2A8"/>
+    <!-- 테이블 -->
+    <rect x="60" y="190" width="280" height="14" rx="2" fill="#A66A48"/>
+    <rect x="80" y="204" width="6" height="60" fill="#A66A48"/>
+    <rect x="314" y="204" width="6" height="60" fill="#A66A48"/>
+    <!-- 벽 패턴 -->
+    <g opacity="0.3">
+      <circle cx="50" cy="80" r="6" fill="#FFAFC5"/>
+      <circle cx="100" cy="50" r="5" fill="#7AC59A"/>
+      <circle cx="350" cy="70" r="6" fill="#B89AE8"/>
+      <circle cx="300" cy="40" r="5" fill="#FFD86B"/>
+    </g>
+    <!-- 손님 1: 흰 모찌 (왼쪽, 음식 들고) -->
+    <g transform="translate(110 145)">
+      <ellipse cx="0" cy="42" rx="38" ry="36" fill="url(#g-mochi-white)" stroke="#E8DCC8" stroke-width="1.5"/>
+      <circle cx="-12" cy="42" r="5" fill="#3A2418"/>
+      <circle cx="12" cy="42" r="5" fill="#3A2418"/>
+      <ellipse cx="-22" cy="52" rx="5" ry="3" fill="#FF8FA3" opacity="0.55"/>
+      <ellipse cx="22" cy="52" rx="5" ry="3" fill="#FF8FA3" opacity="0.55"/>
+      <!-- 행복한 입 (>v<) -->
+      <path d="M -8 52 Q 0 62 8 52" fill="none" stroke="#3A2418" stroke-width="2.5" stroke-linecap="round"/>
+      <!-- 하트 -->
+      <path d="M -50 -5 q 0 -10 8 -10 q 4 0 6 5 q 2 -5 6 -5 q 8 0 8 10 q 0 8 -14 16 q -14 -8 -14 -16 Z" fill="#FF5B7A"/>
+    </g>
+    <!-- 가운데: 무지개 모찌 (접시 위) -->
+    <g transform="translate(200 165)">
+      <ellipse cx="0" cy="32" rx="34" ry="6" fill="white" stroke="#E8C8A8" stroke-width="1"/>
+      <path d="M -20 25 Q -20 -10 0 -10 Q 20 -10 20 25 Z" fill="#FFD86B"/>
+      <path d="M -16 25 Q -16 -5 0 -5 Q 16 -5 16 25 Z" fill="#FF8FA3"/>
+      <circle cx="-6" cy="12" r="2" fill="#3A2418"/>
+      <circle cx="6" cy="12" r="2" fill="#3A2418"/>
+      <path d="M -4 18 Q 0 22 4 18" fill="none" stroke="#3A2418" stroke-width="1.5"/>
+    </g>
+    <!-- 손님 2: 딸기 모찌 (오른쪽, 행복) -->
+    <g transform="translate(290 145)">
+      <ellipse cx="0" cy="42" rx="38" ry="36" fill="url(#g-mochi-pink)" stroke="#FF9FB8" stroke-width="1.5"/>
+      <circle cx="-12" cy="42" r="5" fill="#3A2418"/>
+      <circle cx="12" cy="42" r="5" fill="#3A2418"/>
+      <ellipse cx="-22" cy="52" rx="5" ry="3" fill="#FF5B7A" opacity="0.6"/>
+      <ellipse cx="22" cy="52" rx="5" ry="3" fill="#FF5B7A" opacity="0.6"/>
+      <path d="M -8 50 Q 0 60 8 50" fill="none" stroke="#3A2418" stroke-width="2.5" stroke-linecap="round"/>
+      <!-- 별표 -->
+      <path d="M 38 -5 L 42 5 L 52 5 L 44 12 L 47 22 L 38 16 L 29 22 L 32 12 L 24 5 L 34 5 Z" fill="#FFD86B"/>
+    </g>
+    <!-- 카피 -->
+    <text x="200" y="38" font-family="Gowun Dodum" font-size="22" font-weight="700" fill="#D63A56" text-anchor="middle">한 입이면 행복해져요!</text>
+  </symbol>
+
+  <!-- AD 컷 4: CTA 지금 만나러 가세요 -->
+  <symbol id="ad-cta" viewBox="0 0 400 300">
+    <defs>
+      <linearGradient id="g-cta-bg" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#FFE6F2"/>
+        <stop offset="100%" stop-color="#FFD0DC"/>
+      </linearGradient>
+    </defs>
+    <rect width="400" height="300" fill="url(#g-cta-bg)"/>
+    <!-- 반짝이 -->
+    <g opacity="0.7">
+      <path d="M 60 60 L 64 70 L 74 70 L 66 76 L 69 86 L 60 80 L 51 86 L 54 76 L 46 70 L 56 70 Z" fill="#FFD86B"/>
+      <path d="M 340 80 L 344 90 L 354 90 L 346 96 L 349 106 L 340 100 L 331 106 L 334 96 L 326 90 L 336 90 Z" fill="white"/>
+      <path d="M 320 230 L 324 240 L 334 240 L 326 246 L 329 256 L 320 250 L 311 256 L 314 246 L 306 240 L 316 240 Z" fill="#FFD86B"/>
+    </g>
+    <!-- 중앙 케이크 -->
+    <g transform="translate(200 145)">
+      <ellipse cx="0" cy="52" rx="70" ry="10" fill="rgba(120,80,50,0.18)"/>
+      <rect x="-58" y="20" width="116" height="36" fill="url(#g-cake-base)"/>
+      <ellipse cx="0" cy="20" rx="58" ry="8" fill="url(#g-cream)"/>
+      <rect x="-38" y="-8" width="76" height="28" fill="url(#g-mochi-pink)"/>
+      <ellipse cx="0" cy="-8" rx="38" ry="6" fill="url(#g-cream)"/>
+      <!-- 왕관 -->
+      <path d="M -22 -15 L -18 -28 L -8 -20 L 0 -32 L 8 -20 L 18 -28 L 22 -15 Z" fill="#FFD86B" stroke="#E8B848" stroke-width="1"/>
+      <circle cx="-12" cy="-23" r="1.8" fill="#FF5B7A"/>
+      <circle cx="0" cy="-28" r="1.8" fill="#7AC59A"/>
+      <circle cx="12" cy="-23" r="1.8" fill="#B89AE8"/>
+      <!-- 표정 -->
+      <circle cx="-10" cy="32" r="3.5" fill="#3A2418"/>
+      <circle cx="10" cy="32" r="3.5" fill="#3A2418"/>
+      <ellipse cx="-20" cy="40" rx="4.5" ry="2.5" fill="#FF5B7A" opacity="0.5"/>
+      <ellipse cx="20" cy="40" rx="4.5" ry="2.5" fill="#FF5B7A" opacity="0.5"/>
+      <path d="M -6 40 Q 0 46 6 40" fill="none" stroke="#3A2418" stroke-width="2" stroke-linecap="round"/>
+    </g>
+    <!-- 카피 -->
+    <text x="200" y="40" font-family="Gowun Dodum" font-size="20" font-weight="700" fill="#D63A56" text-anchor="middle">🍰 지금 만나러 가세요! 🍰</text>
+    <text x="200" y="240" font-family="Gowun Dodum" font-size="14" fill="#4A3A2C" text-anchor="middle">모찌 베이커리 · 매일 오전 10시 오픈</text>
+    <text x="200" y="262" font-family="Gowun Dodum" font-size="11" fill="#9A8676" text-anchor="middle">* 본 광고는 게임 속 가상 광고입니다</text>
+    <!-- 가짜 버튼 -->
+    <rect x="140" y="270" width="120" height="22" rx="11" fill="#FF8FA3"/>
+    <text x="200" y="286" font-family="Gowun Dodum" font-size="12" font-weight="700" fill="white" text-anchor="middle">바로 가기 →</text>
+  </symbol>
+
+  <!-- 망치 아이콘 (커서 + 안내) -->
+  <symbol id="m-hammer" viewBox="0 0 100 100">
+    <!-- 손잡이 -->
+    <rect x="46" y="45" width="8" height="48" rx="2" fill="#A66A48" stroke="#5A3A1C" stroke-width="1.5"/>
+    <rect x="46" y="86" width="8" height="6" rx="1" fill="#7A4A28"/>
+    <!-- 머리 -->
+    <rect x="20" y="20" width="60" height="32" rx="6" fill="#9A9A9A" stroke="#3A2418" stroke-width="1.5"/>
+    <rect x="22" y="22" width="56" height="6" fill="#C8C8C8" opacity="0.6"/>
+    <!-- 디테일 -->
+    <line x1="30" y1="36" x2="34" y2="36" stroke="#3A2418" stroke-width="1.5"/>
+    <line x1="66" y1="36" x2="70" y2="36" stroke="#3A2418" stroke-width="1.5"/>
+    <!-- 별 반짝 -->
+    <path d="M 78 16 L 80 22 L 86 22 L 81 26 L 83 32 L 78 28 L 73 32 L 75 26 L 70 22 L 76 22 Z" fill="#FFD86B"/>
+  </symbol>
+
+  <!-- 11. 3단 케이크 (최종) -->
+  <symbol id="m-king" viewBox="0 0 100 100">
+    <ellipse cx="50" cy="96" rx="48" ry="4" fill="#A66A30"/>
+    <rect x="2" y="72" width="96" height="24" fill="url(#g-mochi-pink)"/>
+    <ellipse cx="50" cy="72" rx="48" ry="4" fill="url(#g-cream)"/>
+    <rect x="14" y="48" width="72" height="24" fill="url(#g-cake-base)"/>
+    <ellipse cx="50" cy="48" rx="36" ry="4" fill="url(#g-cream)"/>
+    <rect x="28" y="24" width="44" height="24" fill="url(#g-mochi-mint)"/>
+    <ellipse cx="50" cy="24" rx="22" ry="4" fill="url(#g-cream)"/>
+    <path d="M 28 24 Q 32 30 28 32 Q 34 32 38 28 Q 42 34 46 28 Q 50 34 54 28 Q 58 34 62 28 Q 66 32 72 32 Q 68 30 72 24 Z" fill="url(#g-cream)"/>
+    <path d="M 38 14 L 42 6 L 50 12 L 58 6 L 62 14 Z" fill="#FFD86B" stroke="#E8B848" stroke-width="1"/>
+    <circle cx="42" cy="8" r="1.5" fill="#FF5B7A"/>
+    <circle cx="50" cy="14" r="1.5" fill="#7AC59A"/>
+    <circle cx="58" cy="8" r="1.5" fill="#B89AE8"/>
+    <circle cx="38" cy="84" r="4" fill="#3A2418"/>
+    <circle cx="62" cy="84" r="4" fill="#3A2418"/>
+    <circle cx="39" cy="83" r="1.4" fill="white"/>
+    <circle cx="63" cy="83" r="1.4" fill="white"/>
+    <ellipse cx="28" cy="90" rx="4" ry="2.5" fill="#FF5B7A" opacity="0.5"/>
+    <ellipse cx="72" cy="90" rx="4" ry="2.5" fill="#FF5B7A" opacity="0.5"/>
+    <path d="M 44 88 Q 50 92 56 88" fill="none" stroke="#3A2418" stroke-width="2" stroke-linecap="round"/>
+  </symbol>
+</svg>
+
+<!-- ==========================================
+     메인 화면 (§5.1)
+     ========================================== -->
+<section id="main-screen" class="screen active">
+  <div class="main-logo-area">
+    <h1 class="main-title">스이카 <span>모찌&amp;디저트</span></h1>
+    <p class="main-subtitle">말랑말랑 통통 튀는 머지 퍼즐 세상</p>
+  </div>
+
+  <div class="floating-container">
+    <div class="floating-mochi"><svg viewBox="0 0 100 100"><use href="#m-white"/></svg></div>
+    <div class="floating-mochi"><svg viewBox="0 0 100 100"><use href="#m-pink"/></svg></div>
+    <div class="floating-mochi"><svg viewBox="0 0 100 100"><use href="#m-mint"/></svg></div>
+    <div class="floating-mochi"><svg viewBox="0 0 100 100"><use href="#m-mac-y"/></svg></div>
+    <div class="floating-mochi"><svg viewBox="0 0 100 100"><use href="#m-mac-l"/></svg></div>
+  </div>
+
+  <div class="main-menu-box">
+    <button class="btn" onclick="Suika.switchScreen('game-screen')">디저트 만들러 가기 🍰</button>
+    <button class="btn ghost" onclick="Suika.switchScreen('game-screen')">달콤 도감 📖</button>
+  </div>
+</section>
+
+<!-- ==========================================
+     게임 화면 (§5.2)
+     ========================================== -->
+<section id="game-screen" class="screen">
+  <h2 class="game-title">스이카 <span>모찌&amp;디저트</span></h2>
+
+  <div class="stage">
+    <!-- 좌측 패널 -->
+    <div class="side-panel">
+      <div class="card">
+        <h3>SCORE</h3>
+        <div id="ui-score" class="score-num">0</div>
+        <div class="badge-row">
+          <span class="badge" id="ui-combo-tag" style="display:none;">Combo x1</span>
+        </div>
+      </div>
+      <div class="card">
+        <h3>BEST</h3>
+        <div id="ui-best" class="best-num">0</div>
+      </div>
+      <div class="card">
+        <h3>HOW TO PLAY</h3>
+        <p class="how-to-play">같은 친구끼리 닿으면 합쳐져요. 최종 목표는 3단 케이크! 👑</p>
+      </div>
+    </div>
+
+    <!-- 중앙 플레이 영역 -->
+    <div class="play-container-wrap">
+      <div class="preview-bar">
+        <span class="label">NEXT →</span>
+        <div class="preview-box" id="ui-next-preview">
+          <span class="preview-empty">대기</span>
+        </div>
+      </div>
+      <div class="canvas-viewport-wrapper">
+        <button class="sound-toggle" id="sound-toggle" title="사운드 토글">🔊</button>
+        <div class="danger-line-ui"></div>
+        <canvas id="game-canvas"></canvas>
+        <div class="combo-toast" id="ui-combo-toast"></div>
+        <div class="king-toast" id="ui-king-toast">👑 3단 케이크 완성!</div>
+      </div>
+    </div>
+
+    <!-- 우측 패널 -->
+    <div class="side-panel">
+      <div class="card">
+        <h3>SWEET GUIDE</h3>
+        <div class="sweet-guide-list">
+          <div class="guide-item"><div class="guide-icon"><svg viewBox="0 0 100 100"><use href="#m-white"/></svg></div>흰 모찌 · +1</div>
+          <div class="guide-item"><div class="guide-icon"><svg viewBox="0 0 100 100"><use href="#m-pink"/></svg></div>딸기 모찌 · +3</div>
+          <div class="guide-item"><div class="guide-icon"><svg viewBox="0 0 100 100"><use href="#m-mint"/></svg></div>말차 모찌 · +6</div>
+          <div class="guide-item"><div class="guide-icon"><svg viewBox="0 0 100 100"><use href="#m-mac-y"/></svg></div>레몬 마카롱 · +10</div>
+          <div class="guide-item"><div class="guide-icon"><svg viewBox="0 0 100 100"><use href="#m-mac-l"/></svg></div>라벤더 마카롱 · +15</div>
+          <div class="guide-item"><div class="guide-icon"><svg viewBox="0 0 100 100"><use href="#m-donut"/></svg></div>스프링클 도넛 · +21</div>
+          <div class="guide-item"><div class="guide-icon"><svg viewBox="0 0 100 100"><use href="#m-pudding"/></svg></div>캐러멜 푸딩 · +28</div>
+          <div class="guide-item"><div class="guide-icon"><svg viewBox="0 0 100 100"><use href="#m-cupcake"/></svg></div>체리 컵케이크 · +36</div>
+          <div class="guide-item"><div class="guide-icon"><svg viewBox="0 0 100 100"><use href="#m-mini"/></svg></div>베리 케이크 · +50</div>
+          <div class="guide-item"><div class="guide-icon"><svg viewBox="0 0 100 100"><use href="#m-big"/></svg></div>2단 케이크 · +80</div>
+          <div class="guide-item"><div class="guide-icon"><svg viewBox="0 0 100 100"><use href="#m-king"/></svg></div>3단 케이크 · +130 👑</div>
+        </div>
+      </div>
+      <div class="side-panel-buttons">
+        <button class="btn" onclick="Suika.openModal('pause-modal')">일시정지</button>
+        <button class="btn ghost" onclick="Suika.switchScreen('main-screen')">메인으로</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==========================================
+     일시정지 모달 (§5.3)
+     ========================================== -->
+<div id="pause-modal" class="modal-overlay">
+  <div class="modal-card">
+    <h2>잠시 쉬는 시간 ☕</h2>
+    <p class="modal-desc">디저트들이 통 안에서 얌전히 기다리고 있어요.</p>
+    <div class="modal-buttons">
+      <button class="btn" onclick="Suika.closeModal('pause-modal')">이어하기</button>
+      <button class="btn ghost" onclick="Suika.closeModal('pause-modal'); Suika.switchScreen('main-screen');">메인으로</button>
+    </div>
+  </div>
+</div>
+
+<!-- ==========================================
+     게임오버 결과 모달 (§5.4)
+     ========================================== -->
+<div id="gameover-modal" class="modal-overlay">
+  <div class="modal-card">
+    <h2>오븐이 가득 찼어요! 🎂</h2>
+    <p class="modal-desc">오늘의 디저트 스코어</p>
+    <div class="result-score-large" id="ui-final-score">0</div>
+    <div class="result-best-note">최고 기록 갱신!</div>
+    <div class="rank-badge-box">
+      🎖️ <span id="ui-final-rank">모찌 견습생</span>
+    </div>
+    <div class="result-stats">
+      <div class="result-stat">
+        <div class="result-stat-label">합치기</div>
+        <div class="result-stat-value" id="stat-merges">0</div>
+      </div>
+      <div class="result-stat">
+        <div class="result-stat-label">최고 콤보</div>
+        <div class="result-stat-value" id="stat-combo">0</div>
+      </div>
+      <div class="result-stat">
+        <div class="result-stat-label">3단 케이크</div>
+        <div class="result-stat-value" id="stat-king">0</div>
+      </div>
+    </div>
+    <div class="modal-buttons">
+      <button class="btn revive-btn" id="btn-revive" onclick="Suika.startAd()">
+        📺 광고 보고 망치 받기
+        <span class="revive-note">(1게임 1회 · 디저트 3개 부수기)</span>
+      </button>
+      <button class="btn" onclick="Suika.closeModal('gameover-modal'); Suika.switchScreen('game-screen');">다시 도전</button>
+      <button class="btn ghost" onclick="Suika.closeModal('gameover-modal'); Suika.switchScreen('main-screen');">메인 화면으로</button>
+    </div>
+  </div>
+</div>
+
+<!-- ==========================================
+     광고 모달 (모찌 베이커리 4컷)
+     ========================================== -->
+<div id="ad-modal" class="modal-overlay ad-modal">
+  <div class="ad-frame">
+    <div class="ad-topbar">
+      <span class="ad-label">📢 광고</span>
+      <span class="ad-timer" id="ad-timer">6</span>
+    </div>
+    <div class="ad-progress"><div class="ad-progress-fill" id="ad-progress-fill"></div></div>
+    <div class="ad-slides" id="ad-slides">
+      <div class="ad-slide active"><svg viewBox="0 0 400 300"><use href="#ad-shop"/></svg></div>
+      <div class="ad-slide"><svg viewBox="0 0 400 300"><use href="#ad-newitem"/></svg></div>
+      <div class="ad-slide"><svg viewBox="0 0 400 300"><use href="#ad-happy"/></svg></div>
+      <div class="ad-slide"><svg viewBox="0 0 400 300"><use href="#ad-cta"/></svg></div>
+    </div>
+    <div class="ad-footer">광고가 끝나면 망치를 받아요 🔨</div>
+  </div>
+</div>
+
+<!-- ==========================================
+     망치 모드 안내 (게임 화면 위 오버레이)
+     ========================================== -->
+<div id="hammer-banner" class="hammer-banner">
+  <div class="hammer-icon"><svg viewBox="0 0 100 100"><use href="#m-hammer"/></svg></div>
+  <div class="hammer-text">
+    <strong>🔨 망치 모드!</strong>
+    <span>부술 디저트 <em id="hammer-remaining">3</em>개 남았어요</span>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/matter-js@0.20.0/build/matter.min.js"></script>
+<script src="src/storage.js"></script>
+<script src="src/audio.js"></script>
+<script src="src/desserts.js"></script>
+<script src="src/physics.js"></script>
+<script src="src/render.js"></script>
+<script src="src/game.js"></script>
+
+<!-- PWA 서비스 워커 등록 -->
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch((err) => {
+        console.warn('[PWA] 서비스 워커 등록 실패:', err);
+      });
+    });
+  }
+</script>
+</body>
+</html>

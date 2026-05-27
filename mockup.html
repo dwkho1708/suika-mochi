@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<title>스이카 게임 시안 — 모찌&디저트</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FFF6EC;
+    --bg-2: #FDE9D9;
+    --card: #FFFFFF;
+    --ink: #4A3A2C;
+    --ink-soft: #9A8676;
+    --accent: #FF8FA3;
+    --shadow: 0 10px 30px rgba(120, 80, 50, 0.10);
+    --shadow-soft: 0 4px 14px rgba(120, 80, 50, 0.08);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    min-height: 100vh;
+    background:
+      radial-gradient(circle at 15% 10%, #FFE6F2 0%, transparent 40%),
+      radial-gradient(circle at 85% 90%, #E6F2FF 0%, transparent 45%),
+      var(--bg);
+    font-family: 'Quicksand', 'Gowun Dodum', sans-serif;
+    color: var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px;
+  }
+  .stage {
+    display: grid;
+    grid-template-columns: 240px 420px 240px;
+    gap: 28px;
+    align-items: start;
+  }
+  .side { display: flex; flex-direction: column; gap: 18px; }
+  .card {
+    background: var(--card);
+    border-radius: 22px;
+    padding: 22px 20px;
+    box-shadow: var(--shadow);
+  }
+  .card h3 {
+    font-family: 'Gowun Dodum', sans-serif;
+    font-size: 14px;
+    color: var(--ink-soft);
+    font-weight: 400;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+  }
+  .score-num { font-size: 42px; font-weight: 700; letter-spacing: -0.02em; }
+  .best-num { font-size: 22px; font-weight: 700; color: var(--accent); }
+
+  .container-wrap {
+    background: var(--card);
+    border-radius: 28px;
+    padding: 20px;
+    box-shadow: var(--shadow);
+  }
+  .preview-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 8px 14px;
+  }
+  .preview-bar .label {
+    font-family: 'Gowun Dodum', sans-serif;
+    color: var(--ink-soft);
+    font-size: 13px;
+  }
+  .preview-wrap { width: 50px; height: 50px; }
+  .play-area {
+    position: relative;
+    height: 540px;
+    background: linear-gradient(to bottom, #FFFBF5 0%, #FFEEF5 100%);
+    border-radius: 20px;
+    overflow: hidden;
+    border: 2px dashed #F0DCE8;
+  }
+  .danger-line {
+    position: absolute;
+    top: 70px; left: 0; right: 0;
+    border-top: 1px dashed #FFBFCB;
+  }
+  .danger-line::after {
+    content: 'GAME OVER LINE';
+    position: absolute;
+    right: 10px; top: -16px;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    color: #FFBFCB;
+    font-weight: 700;
+  }
+  .drop-guide {
+    position: absolute;
+    top: 8px; bottom: 0; left: 220px;
+    width: 2px;
+    background: repeating-linear-gradient(to bottom, #FFCDD6 0 6px, transparent 6px 12px);
+    opacity: 0.7;
+  }
+  .item {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    filter: drop-shadow(0 4px 8px rgba(120, 80, 50, 0.12));
+  }
+  .item svg { width: 100%; height: 100%; overflow: visible; }
+
+  .badge-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+  .badge {
+    background: var(--bg-2);
+    color: var(--ink);
+    border-radius: 999px;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 700;
+    font-family: 'Gowun Dodum';
+  }
+  .btn {
+    width: 100%;
+    border: none;
+    background: var(--accent);
+    color: white;
+    font-family: 'Gowun Dodum';
+    font-size: 16px;
+    font-weight: 700;
+    padding: 14px;
+    border-radius: 16px;
+    cursor: pointer;
+    box-shadow: 0 6px 14px rgba(255, 143, 163, 0.35);
+    margin-top: 8px;
+  }
+  .btn.ghost {
+    background: white;
+    color: var(--ink);
+    box-shadow: var(--shadow-soft);
+  }
+  .legend { display: flex; flex-direction: column; gap: 12px; margin-top: 12px; }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: 'Gowun Dodum';
+    font-size: 13px;
+  }
+  .legend-icon { width: 34px; height: 34px; flex-shrink: 0; }
+  .title {
+    font-family: 'Gowun Dodum';
+    font-size: 28px;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 18px;
+  }
+  .title span { color: var(--accent); }
+  .footer-note {
+    text-align: center;
+    margin-top: 24px;
+    color: var(--ink-soft);
+    font-size: 12px;
+    font-family: 'Gowun Dodum';
+  }
+</style>
+</head>
+<body>
+
+<!-- SVG 디저트 캐릭터 정의 -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <!-- 모찌 그라데이션 -->
+    <radialGradient id="g-mochi-white" cx="40%" cy="35%"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="100%" stop-color="#F2EAE0"/></radialGradient>
+    <radialGradient id="g-mochi-pink" cx="40%" cy="35%"><stop offset="0%" stop-color="#FFE0E8"/><stop offset="100%" stop-color="#FFAFC5"/></radialGradient>
+    <radialGradient id="g-mochi-mint" cx="40%" cy="35%"><stop offset="0%" stop-color="#E0F5E8"/><stop offset="100%" stop-color="#9CDDB8"/></radialGradient>
+    <radialGradient id="g-mac-yellow" cx="40%" cy="35%"><stop offset="0%" stop-color="#FFF5C8"/><stop offset="100%" stop-color="#FFD86B"/></radialGradient>
+    <radialGradient id="g-mac-lavender" cx="40%" cy="35%"><stop offset="0%" stop-color="#EAD9FF"/><stop offset="100%" stop-color="#B89AE8"/></radialGradient>
+    <radialGradient id="g-donut" cx="40%" cy="35%"><stop offset="0%" stop-color="#FFD0DC"/><stop offset="100%" stop-color="#FF8FB0"/></radialGradient>
+    <radialGradient id="g-donut-base" cx="40%" cy="35%"><stop offset="0%" stop-color="#F0D4A8"/><stop offset="100%" stop-color="#C99670"/></radialGradient>
+    <radialGradient id="g-pudding" cx="40%" cy="35%"><stop offset="0%" stop-color="#FFE8A8"/><stop offset="100%" stop-color="#E8B860"/></radialGradient>
+    <radialGradient id="g-cream" cx="40%" cy="35%"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="100%" stop-color="#FFF0DC"/></radialGradient>
+    <radialGradient id="g-cake-base" cx="40%" cy="35%"><stop offset="0%" stop-color="#FFE8C8"/><stop offset="100%" stop-color="#E8B888"/></radialGradient>
+    <radialGradient id="g-cake-choco" cx="40%" cy="35%"><stop offset="0%" stop-color="#A66A48"/><stop offset="100%" stop-color="#6B3A20"/></radialGradient>
+    <radialGradient id="g-berry" cx="40%" cy="35%"><stop offset="0%" stop-color="#FF8FA3"/><stop offset="100%" stop-color="#D63A56"/></radialGradient>
+  </defs>
+
+  <!-- 1. 흰 모찌 -->
+  <symbol id="m-white" viewBox="0 0 100 100">
+    <ellipse cx="50" cy="56" rx="38" ry="34" fill="url(#g-mochi-white)" stroke="#E8DCC8" stroke-width="1.5"/>
+    <!-- 가루 느낌 -->
+    <ellipse cx="50" cy="40" rx="30" ry="6" fill="white" opacity="0.6"/>
+    <circle cx="36" cy="56" r="5" fill="#3A2418"/>
+    <circle cx="64" cy="56" r="5" fill="#3A2418"/>
+    <circle cx="38" cy="54" r="1.8" fill="white"/>
+    <circle cx="66" cy="54" r="1.8" fill="white"/>
+    <ellipse cx="26" cy="64" rx="5" ry="3.2" fill="#FF8FA3" opacity="0.55"/>
+    <ellipse cx="74" cy="64" rx="5" ry="3.2" fill="#FF8FA3" opacity="0.55"/>
+    <path d="M 44 66 Q 50 70 56 66" fill="none" stroke="#3A2418" stroke-width="2" stroke-linecap="round"/>
+  </symbol>
+
+  <!-- 2. 딸기 모찌 -->
+  <symbol id="m-pink" viewBox="0 0 100 100">
+    <ellipse cx="50" cy="56" rx="40" ry="36" fill="url(#g-mochi-pink)" stroke="#FF9FB8" stroke-width="1.5"/>
+    <ellipse cx="50" cy="40" rx="32" ry="6" fill="white" opacity="0.5"/>
+    <!-- 딸기 토핑 -->
+    <path d="M 40 16 Q 50 8 60 16 Q 56 26 50 28 Q 44 26 40 16 Z" fill="url(#g-berry)"/>
+    <path d="M 42 14 Q 50 8 58 14 L 56 18 L 54 14 L 50 18 L 46 14 L 44 18 Z" fill="#5A9B3A"/>
+    <circle cx="36" cy="56" r="5" fill="#3A2418"/>
+    <circle cx="64" cy="56" r="5" fill="#3A2418"/>
+    <circle cx="38" cy="54" r="1.8" fill="white"/>
+    <circle cx="66" cy="54" r="1.8" fill="white"/>
+    <ellipse cx="26" cy="64" rx="5.5" ry="3.5" fill="#FF5B7A" opacity="0.5"/>
+    <ellipse cx="74" cy="64" rx="5.5" ry="3.5" fill="#FF5B7A" opacity="0.5"/>
+    <path d="M 44 66 Q 50 72 56 66" fill="none" stroke="#3A2418" stroke-width="2.2" stroke-linecap="round"/>
+  </symbol>
+
+  <!-- 3. 말차 모찌 -->
+  <symbol id="m-mint" viewBox="0 0 100 100">
+    <ellipse cx="50" cy="56" rx="40" ry="36" fill="url(#g-mochi-mint)" stroke="#7AC59A" stroke-width="1.5"/>
+    <ellipse cx="50" cy="40" rx="32" ry="6" fill="white" opacity="0.5"/>
+    <!-- 잎 -->
+    <path d="M 50 14 Q 38 10 36 18 Q 44 22 50 20 Q 56 22 64 18 Q 62 10 50 14 Z" fill="#5A9B3A"/>
+    <circle cx="36" cy="56" r="5.5" fill="#3A2418"/>
+    <circle cx="64" cy="56" r="5.5" fill="#3A2418"/>
+    <circle cx="38" cy="54" r="2" fill="white"/>
+    <circle cx="66" cy="54" r="2" fill="white"/>
+    <ellipse cx="26" cy="64" rx="5.5" ry="3.5" fill="#FF8FA3" opacity="0.5"/>
+    <ellipse cx="74" cy="64" rx="5.5" ry="3.5" fill="#FF8FA3" opacity="0.5"/>
+    <!-- 살짝 벌린 입 -->
+    <path d="M 44 66 Q 50 74 56 66 Q 50 70 44 66 Z" fill="#3A2418"/>
+  </symbol>
+
+  <!-- 4. 마카롱 노랑 -->
+  <symbol id="m-mac-y" viewBox="0 0 100 100">
+    <!-- 아래 쿠키 -->
+    <path d="M 14 56 Q 14 78 50 80 Q 86 78 86 56 Z" fill="url(#g-mac-yellow)"/>
+    <!-- 가운데 크림 -->
+    <rect x="14" y="48" width="72" height="14" fill="#FFF0DC"/>
+    <!-- 위 쿠키 -->
+    <path d="M 14 50 Q 14 28 50 26 Q 86 28 86 50 Z" fill="url(#g-mac-yellow)"/>
+    <!-- 쿠키 결 -->
+    <ellipse cx="22" cy="58" rx="4" ry="2" fill="#E8B848" opacity="0.4"/>
+    <ellipse cx="78" cy="58" rx="4" ry="2" fill="#E8B848" opacity="0.4"/>
+    <ellipse cx="50" cy="32" rx="22" ry="4" fill="white" opacity="0.5"/>
+    <!-- 표정 -->
+    <circle cx="38" cy="42" r="4.5" fill="#3A2418"/>
+    <circle cx="62" cy="42" r="4.5" fill="#3A2418"/>
+    <circle cx="40" cy="40.5" r="1.6" fill="white"/>
+    <circle cx="64" cy="40.5" r="1.6" fill="white"/>
+    <ellipse cx="28" cy="48" rx="5" ry="3" fill="#FF8FA3" opacity="0.5"/>
+    <ellipse cx="72" cy="48" rx="5" ry="3" fill="#FF8FA3" opacity="0.5"/>
+    <path d="M 46 50 Q 50 53 54 50" fill="none" stroke="#3A2418" stroke-width="2" stroke-linecap="round"/>
+  </symbol>
+
+  <!-- 5. 마카롱 라벤더 -->
+  <symbol id="m-mac-l" viewBox="0 0 100 100">
+    <path d="M 12 56 Q 12 80 50 82 Q 88 80 88 56 Z" fill="url(#g-mac-lavender)"/>
+    <rect x="12" y="48" width="76" height="14" fill="#F5E8DC"/>
+    <path d="M 12 50 Q 12 26 50 24 Q 88 26 88 50 Z" fill="url(#g-mac-lavender)"/>
+    <ellipse cx="22" cy="58" rx="4" ry="2" fill="#9678C0" opacity="0.4"/>
+    <ellipse cx="78" cy="58" rx="4" ry="2" fill="#9678C0" opacity="0.4"/>
+    <ellipse cx="50" cy="30" rx="24" ry="4" fill="white" opacity="0.45"/>
+    <!-- 작은 별 토핑 -->
+    <path d="M 50 16 L 52 21 L 57 21 L 53 24 L 55 29 L 50 26 L 45 29 L 47 24 L 43 21 L 48 21 Z" fill="#FFD86B"/>
+    <circle cx="38" cy="40" r="4.5" fill="#3A2418"/>
+    <circle cx="62" cy="40" r="4.5" fill="#3A2418"/>
+    <circle cx="40" cy="38.5" r="1.6" fill="white"/>
+    <circle cx="64" cy="38.5" r="1.6" fill="white"/>
+    <ellipse cx="28" cy="46" rx="5" ry="3" fill="#FF8FA3" opacity="0.5"/>
+    <ellipse cx="72" cy="46" rx="5" ry="3" fill="#FF8FA3" opacity="0.5"/>
+    <path d="M 44 48 Q 50 54 56 48" fill="none" stroke="#3A2418" stroke-width="2.2" stroke-linecap="round"/>
+  </symbol>
+
+  <!-- 6. 도넛 -->
+  <symbol id="m-donut" viewBox="0 0 100 100">
+    <!-- 도넛 베이스 -->
+    <circle cx="50" cy="56" r="42" fill="url(#g-donut-base)"/>
+    <!-- 핑크 글레이즈 (위쪽만) -->
+    <path d="M 50 14
+             a 42 42 0 0 1 41 50
+             q -20 -6 -41 -6
+             q -21 0 -41 6
+             a 42 42 0 0 1 41 -50 Z" fill="url(#g-donut)"/>
+    <!-- 글레이즈 흘림 -->
+    <path d="M 14 56 q 4 14 10 18" stroke="#FF8FB0" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.7"/>
+    <path d="M 86 56 q -2 12 -8 18" stroke="#FF8FB0" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.7"/>
+    <!-- 가운데 구멍 -->
+    <circle cx="50" cy="56" r="14" fill="#FFEEF5"/>
+    <circle cx="50" cy="56" r="14" fill="none" stroke="#D8A088" stroke-width="1"/>
+    <!-- 스프링클 -->
+    <rect x="30" y="26" width="2.5" height="6" rx="1" fill="#7AC59A" transform="rotate(20 30 26)"/>
+    <rect x="62" y="22" width="2.5" height="6" rx="1" fill="#FFD86B" transform="rotate(-30 62 22)"/>
+    <rect x="74" y="38" width="2.5" height="6" rx="1" fill="#B89AE8" transform="rotate(60 74 38)"/>
+    <rect x="20" y="44" width="2.5" height="6" rx="1" fill="#FFD86B" transform="rotate(-20 20 44)"/>
+    <rect x="76" y="74" width="2.5" height="6" rx="1" fill="#7AC59A" transform="rotate(40 76 74)"/>
+    <rect x="22" y="78" width="2.5" height="6" rx="1" fill="#B89AE8" transform="rotate(-50 22 78)"/>
+    <rect x="44" y="86" width="2.5" height="6" rx="1" fill="#FFD86B" transform="rotate(10 44 86)"/>
+    <!-- 표정 (구멍 양옆) -->
+    <circle cx="28" cy="56" r="4" fill="#3A2418"/>
+    <circle cx="72" cy="56" r="4" fill="#3A2418"/>
+    <circle cx="29" cy="55" r="1.4" fill="white"/>
+    <circle cx="73" cy="55" r="1.4" fill="white"/>
+    <ellipse cx="20" cy="64" rx="4.5" ry="3" fill="#FF5B7A" opacity="0.45"/>
+    <ellipse cx="80" cy="64" rx="4.5" ry="3" fill="#FF5B7A" opacity="0.45"/>
+  </symbol>
+
+  <!-- 7. 푸딩 -->
+  <symbol id="m-pudding" viewBox="0 0 100 100">
+    <!-- 푸딩 몸체 (사다리꼴) -->
+    <path d="M 22 38 Q 22 36 24 36 L 76 36 Q 78 36 78 38 L 84 88 Q 84 92 80 92 L 20 92 Q 16 92 16 88 Z" fill="url(#g-pudding)"/>
+    <!-- 캐러멜 위 -->
+    <ellipse cx="50" cy="36" rx="28" ry="6" fill="#A66A30"/>
+    <ellipse cx="50" cy="34" rx="28" ry="6" fill="#C9853F"/>
+    <!-- 캐러멜 흘림 -->
+    <path d="M 30 36 q -2 10 0 14" stroke="#A66A30" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.6"/>
+    <path d="M 70 36 q 2 10 0 14" stroke="#A66A30" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.6"/>
+    <!-- 광택 -->
+    <ellipse cx="32" cy="60" rx="4" ry="14" fill="#FFF5C8" opacity="0.5"/>
+    <!-- 표정 -->
+    <circle cx="38" cy="62" r="5" fill="#3A2418"/>
+    <circle cx="62" cy="62" r="5" fill="#3A2418"/>
+    <circle cx="40" cy="60" r="1.8" fill="white"/>
+    <circle cx="64" cy="60" r="1.8" fill="white"/>
+    <ellipse cx="28" cy="72" rx="5.5" ry="3.5" fill="#FF5B7A" opacity="0.45"/>
+    <ellipse cx="72" cy="72" rx="5.5" ry="3.5" fill="#FF5B7A" opacity="0.45"/>
+    <path d="M 44 74 Q 50 80 56 74" fill="none" stroke="#3A2418" stroke-width="2.2" stroke-linecap="round"/>
+  </symbol>
+
+  <!-- 8. 컵케이크 -->
+  <symbol id="m-cupcake" viewBox="0 0 100 100">
+    <!-- 컵 -->
+    <path d="M 22 60 L 78 60 L 72 94 Q 72 96 70 96 L 30 96 Q 28 96 28 94 Z" fill="#FFB8C8"/>
+    <!-- 컵 줄무늬 -->
+    <line x1="34" y1="62" x2="32" y2="94" stroke="#E89AAC" stroke-width="1.5"/>
+    <line x1="44" y1="62" x2="43" y2="94" stroke="#E89AAC" stroke-width="1.5"/>
+    <line x1="54" y1="62" x2="54" y2="94" stroke="#E89AAC" stroke-width="1.5"/>
+    <line x1="64" y1="62" x2="65" y2="94" stroke="#E89AAC" stroke-width="1.5"/>
+    <line x1="74" y1="62" x2="76" y2="94" stroke="#E89AAC" stroke-width="1.5"/>
+    <!-- 크림 (소용돌이) -->
+    <path d="M 18 62 Q 14 50 22 44 Q 16 32 30 28 Q 24 14 42 14 Q 50 4 60 14 Q 76 12 72 26 Q 86 30 80 42 Q 88 50 82 60 Z" fill="url(#g-cream)" stroke="#F0E0CC" stroke-width="1.2"/>
+    <!-- 체리 토핑 -->
+    <circle cx="50" cy="14" r="6" fill="url(#g-berry)"/>
+    <path d="M 50 8 Q 52 4 56 4" stroke="#5A3A1C" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <!-- 크림 위 표정 -->
+    <circle cx="40" cy="38" r="4" fill="#3A2418"/>
+    <circle cx="60" cy="38" r="4" fill="#3A2418"/>
+    <circle cx="41" cy="37" r="1.4" fill="white"/>
+    <circle cx="61" cy="37" r="1.4" fill="white"/>
+    <ellipse cx="32" cy="46" rx="4" ry="2.5" fill="#FF8FA3" opacity="0.5"/>
+    <ellipse cx="68" cy="46" rx="4" ry="2.5" fill="#FF8FA3" opacity="0.5"/>
+    <path d="M 46 46 Q 50 50 54 46" fill="none" stroke="#3A2418" stroke-width="2" stroke-linecap="round"/>
+  </symbol>
+
+  <!-- 9. 미니 케이크 -->
+  <symbol id="m-mini" viewBox="0 0 100 100">
+    <!-- 베이스 -->
+    <ellipse cx="50" cy="90" rx="42" ry="6" fill="#D89C70"/>
+    <rect x="8" y="50" width="84" height="40" fill="url(#g-cake-base)"/>
+    <!-- 크림 윗면 -->
+    <ellipse cx="50" cy="50" rx="42" ry="8" fill="url(#g-cream)"/>
+    <!-- 크림 흘림 -->
+    <path d="M 8 50 Q 12 60 8 62 Q 14 64 18 56 Q 22 64 26 58 Q 30 66 34 56 Q 38 64 42 58 Q 46 66 50 56 Q 54 66 58 58 Q 62 64 66 56 Q 70 66 74 58 Q 78 64 82 56 Q 86 64 92 62 Q 88 60 92 50 Z" fill="url(#g-cream)"/>
+    <!-- 베리 토핑 -->
+    <circle cx="22" cy="44" r="6" fill="url(#g-berry)"/>
+    <circle cx="50" cy="42" r="7" fill="url(#g-berry)"/>
+    <circle cx="78" cy="44" r="6" fill="url(#g-berry)"/>
+    <!-- 잎 -->
+    <path d="M 50 36 Q 56 32 58 36 Q 54 40 50 38 Z" fill="#5A9B3A"/>
+    <!-- 표정 (몸체에) -->
+    <circle cx="38" cy="68" r="4.5" fill="#3A2418"/>
+    <circle cx="62" cy="68" r="4.5" fill="#3A2418"/>
+    <circle cx="40" cy="66.5" r="1.6" fill="white"/>
+    <circle cx="64" cy="66.5" r="1.6" fill="white"/>
+    <ellipse cx="28" cy="76" rx="5" ry="3" fill="#FF8FA3" opacity="0.5"/>
+    <ellipse cx="72" cy="76" rx="5" ry="3" fill="#FF8FA3" opacity="0.5"/>
+    <path d="M 44 76 Q 50 82 56 76" fill="none" stroke="#3A2418" stroke-width="2.2" stroke-linecap="round"/>
+  </symbol>
+
+  <!-- 10. 큰 케이크 (2단) -->
+  <symbol id="m-big" viewBox="0 0 100 100">
+    <!-- 아래단 -->
+    <ellipse cx="50" cy="94" rx="46" ry="5" fill="#B8845C"/>
+    <rect x="4" y="60" width="92" height="36" fill="url(#g-cake-choco)"/>
+    <ellipse cx="50" cy="60" rx="46" ry="6" fill="url(#g-cream)"/>
+    <!-- 가운데 크림 라인 -->
+    <rect x="4" y="68" width="92" height="3" fill="#FFF0DC" opacity="0.7"/>
+    <!-- 위단 -->
+    <rect x="22" y="30" width="56" height="32" fill="url(#g-cake-base)"/>
+    <ellipse cx="50" cy="30" rx="28" ry="5" fill="url(#g-cream)"/>
+    <!-- 위단 크림 흘림 -->
+    <path d="M 22 30 Q 26 38 22 40 Q 28 42 32 34 Q 36 44 42 36 Q 46 44 50 36 Q 54 44 58 36 Q 64 44 68 34 Q 72 42 78 40 Q 74 38 78 30 Z" fill="url(#g-cream)"/>
+    <!-- 베리 -->
+    <circle cx="36" cy="26" r="5" fill="url(#g-berry)"/>
+    <circle cx="50" cy="22" r="6" fill="url(#g-berry)"/>
+    <circle cx="64" cy="26" r="5" fill="url(#g-berry)"/>
+    <!-- 잎 -->
+    <path d="M 50 16 Q 56 12 58 16 Q 54 20 50 18 Z" fill="#5A9B3A"/>
+    <!-- 표정 (아래단에) -->
+    <circle cx="38" cy="78" r="5" fill="#FFF0DC"/>
+    <circle cx="62" cy="78" r="5" fill="#FFF0DC"/>
+    <circle cx="38" cy="78" r="3.5" fill="#3A2418"/>
+    <circle cx="62" cy="78" r="3.5" fill="#3A2418"/>
+    <circle cx="39" cy="77" r="1.4" fill="white"/>
+    <circle cx="63" cy="77" r="1.4" fill="white"/>
+    <ellipse cx="26" cy="84" rx="5" ry="3" fill="#FF8FA3" opacity="0.5"/>
+    <ellipse cx="74" cy="84" rx="5" ry="3" fill="#FF8FA3" opacity="0.5"/>
+    <path d="M 44 84 Q 50 90 56 84" fill="none" stroke="#FFF0DC" stroke-width="2.5" stroke-linecap="round"/>
+  </symbol>
+
+  <!-- 11. 최종 — 거대 3단 케이크 (수박 자리) -->
+  <symbol id="m-king" viewBox="0 0 100 100">
+    <!-- 1단 -->
+    <ellipse cx="50" cy="96" rx="48" ry="4" fill="#A66A30"/>
+    <rect x="2" y="72" width="96" height="24" fill="url(#g-mochi-pink)"/>
+    <ellipse cx="50" cy="72" rx="48" ry="4" fill="url(#g-cream)"/>
+    <!-- 2단 -->
+    <rect x="14" y="48" width="72" height="24" fill="url(#g-cake-base)"/>
+    <ellipse cx="50" cy="48" rx="36" ry="4" fill="url(#g-cream)"/>
+    <!-- 3단 -->
+    <rect x="28" y="24" width="44" height="24" fill="url(#g-mochi-mint)"/>
+    <ellipse cx="50" cy="24" rx="22" ry="4" fill="url(#g-cream)"/>
+    <!-- 크림 흘림 (각 단) -->
+    <path d="M 28 24 Q 32 30 28 32 Q 34 32 38 28 Q 42 34 46 28 Q 50 34 54 28 Q 58 34 62 28 Q 66 32 72 32 Q 68 30 72 24 Z" fill="url(#g-cream)"/>
+    <!-- 왕관 -->
+    <path d="M 38 14 L 42 6 L 50 12 L 58 6 L 62 14 Z" fill="#FFD86B" stroke="#E8B848" stroke-width="1"/>
+    <circle cx="42" cy="8" r="1.5" fill="#FF5B7A"/>
+    <circle cx="50" cy="14" r="1.5" fill="#7AC59A"/>
+    <circle cx="58" cy="8" r="1.5" fill="#B89AE8"/>
+    <!-- 1단 표정 -->
+    <circle cx="38" cy="84" r="4" fill="#3A2418"/>
+    <circle cx="62" cy="84" r="4" fill="#3A2418"/>
+    <circle cx="39" cy="83" r="1.4" fill="white"/>
+    <circle cx="63" cy="83" r="1.4" fill="white"/>
+    <ellipse cx="28" cy="90" rx="4" ry="2.5" fill="#FF5B7A" opacity="0.5"/>
+    <ellipse cx="72" cy="90" rx="4" ry="2.5" fill="#FF5B7A" opacity="0.5"/>
+    <path d="M 44 88 Q 50 92 56 88" fill="none" stroke="#3A2418" stroke-width="2" stroke-linecap="round"/>
+    <!-- 별 반짝 -->
+    <text x="14" y="20" font-size="10" fill="#FFD86B">✦</text>
+    <text x="82" y="22" font-size="8" fill="#FF8FA3">✦</text>
+  </symbol>
+</svg>
+
+  <div>
+    <h1 class="title">스이카 <span>모찌&amp;디저트</span></h1>
+    <div class="stage">
+      <!-- 좌측 -->
+      <div class="side">
+        <div class="card">
+          <h3>SCORE</h3>
+          <div class="score-num">1,248</div>
+          <div class="badge-row">
+            <span class="badge">콤보 x3</span>
+            <span class="badge">+24</span>
+          </div>
+        </div>
+        <div class="card">
+          <h3>BEST</h3>
+          <div class="best-num">3,420</div>
+        </div>
+        <div class="card">
+          <h3>HOW TO PLAY</h3>
+          <p style="font-family:'Gowun Dodum'; font-size:13px; line-height:1.6; color:var(--ink-soft); margin-top:6px;">
+            같은 친구끼리 닿으면 한 단계 위로 합쳐져요. 최종 목표는 3단 케이크!
+          </p>
+        </div>
+      </div>
+
+      <!-- 중앙 -->
+      <div class="container-wrap">
+        <div class="preview-bar">
+          <span class="label">NEXT →</span>
+          <div class="preview-wrap"><svg viewBox="0 0 100 100"><use href="#m-mac-y"/></svg></div>
+        </div>
+        <div class="play-area">
+          <div class="danger-line"></div>
+          <div class="drop-guide"></div>
+
+          <!-- 위쪽 다음 친구 -->
+          <div class="item" style="left: 195px; top: 14px; width: 50px; height: 50px;">
+            <svg viewBox="0 0 100 100"><use href="#m-mac-y"/></svg>
+          </div>
+
+          <!-- 쌓인 디저트 -->
+          <div class="item" style="left: 24px; bottom: 14px; width: 140px; height: 140px;">
+            <svg viewBox="0 0 100 100"><use href="#m-big"/></svg>
+          </div>
+          <div class="item" style="left: 174px; bottom: 10px; width: 110px; height: 110px;">
+            <svg viewBox="0 0 100 100"><use href="#m-cupcake"/></svg>
+          </div>
+          <div class="item" style="left: 290px; bottom: 18px; width: 92px; height: 92px;">
+            <svg viewBox="0 0 100 100"><use href="#m-pudding"/></svg>
+          </div>
+          <div class="item" style="left: 250px; bottom: 118px; width: 74px; height: 74px;">
+            <svg viewBox="0 0 100 100"><use href="#m-donut"/></svg>
+          </div>
+          <div class="item" style="left: 158px; bottom: 132px; width: 62px; height: 62px;">
+            <svg viewBox="0 0 100 100"><use href="#m-mac-l"/></svg>
+          </div>
+          <div class="item" style="left: 88px; bottom: 168px; width: 52px; height: 52px;">
+            <svg viewBox="0 0 100 100"><use href="#m-mint"/></svg>
+          </div>
+          <div class="item" style="left: 220px; bottom: 200px; width: 44px; height: 44px;">
+            <svg viewBox="0 0 100 100"><use href="#m-pink"/></svg>
+          </div>
+          <div class="item" style="left: 50px; bottom: 228px; width: 38px; height: 38px;">
+            <svg viewBox="0 0 100 100"><use href="#m-white"/></svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- 우측 도감 -->
+      <div class="side">
+        <div class="card">
+          <h3>SWEET GUIDE</h3>
+          <div class="legend">
+            <div class="legend-item"><div class="legend-icon"><svg viewBox="0 0 100 100"><use href="#m-white"/></svg></div>흰 모찌 · 1점</div>
+            <div class="legend-item"><div class="legend-icon"><svg viewBox="0 0 100 100"><use href="#m-pink"/></svg></div>딸기 모찌 · 3점</div>
+            <div class="legend-item"><div class="legend-icon"><svg viewBox="0 0 100 100"><use href="#m-mint"/></svg></div>말차 모찌 · 6점</div>
+            <div class="legend-item"><div class="legend-icon"><svg viewBox="0 0 100 100"><use href="#m-mac-y"/></svg></div>레몬 마카롱 · 10점</div>
+            <div class="legend-item"><div class="legend-icon"><svg viewBox="0 0 100 100"><use href="#m-mac-l"/></svg></div>라벤더 마카롱 · 15점</div>
+            <div class="legend-item"><div class="legend-icon"><svg viewBox="0 0 100 100"><use href="#m-donut"/></svg></div>스프링클 도넛 · 21점</div>
+            <div class="legend-item"><div class="legend-icon"><svg viewBox="0 0 100 100"><use href="#m-pudding"/></svg></div>캐러멜 푸딩 · 28점</div>
+            <div class="legend-item"><div class="legend-icon"><svg viewBox="0 0 100 100"><use href="#m-cupcake"/></svg></div>체리 컵케이크 · 36점</div>
+            <div class="legend-item"><div class="legend-icon"><svg viewBox="0 0 100 100"><use href="#m-mini"/></svg></div>베리 케이크 · 45점</div>
+            <div class="legend-item"><div class="legend-icon"><svg viewBox="0 0 100 100"><use href="#m-big"/></svg></div>2단 케이크 · 55점</div>
+            <div class="legend-item"><div class="legend-icon"><svg viewBox="0 0 100 100"><use href="#m-king"/></svg></div>3단 케이크 · 👑</div>
+          </div>
+        </div>
+        <button class="btn">다시 시작</button>
+        <button class="btn ghost">일시정지</button>
+      </div>
+    </div>
+    <div class="footer-note">디자인 시안 — 11종 디저트 친구들이 모두 표정·볼터치·반짝이 눈으로 살아 있어요</div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,758 @@
+/* ==========================================
+   스이카: 모찌&디저트 — 디자인 시스템
+   기획서 v2.0 §2 디자인 시스템 / §5 화면 / §8 반응형
+   ========================================== */
+
+:root {
+  --bg: #FFF6EC;
+  --bg-2: #FDE9D9;
+  --card: #FFFFFF;
+  --ink: #4A3A2C;
+  --ink-soft: #9A8676;
+  --accent: #FF8FA3;
+  --danger: #FFBFCB;
+  --shadow: 0 10px 30px rgba(120, 80, 50, 0.10);
+  --shadow-soft: 0 4px 14px rgba(120, 80, 50, 0.08);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+body {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 15% 10%, #FFE6F2 0%, transparent 40%),
+    radial-gradient(circle at 85% 90%, #E6F2FF 0%, transparent 45%),
+    var(--bg);
+  font-family: 'Quicksand', 'Gowun Dodum', sans-serif;
+  color: var(--ink);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  overflow-x: hidden;
+}
+
+/* SVG 정의 영역 숨김 */
+.svg-defs { position: absolute; width: 0; height: 0; }
+
+/* ==========================================
+   화면 전환 (Screen Router)
+   ========================================== */
+.screen {
+  display: none;
+  width: 100%;
+  max-width: 1100px;
+  animation: fadeIn 0.4s ease-in-out;
+}
+.screen.active { display: block; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ==========================================
+   공통 컴포넌트
+   ========================================== */
+.btn {
+  border: none;
+  background: var(--accent);
+  color: white;
+  font-family: 'Gowun Dodum', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  padding: 14px 28px;
+  border-radius: 16px;
+  cursor: pointer;
+  box-shadow: 0 6px 14px rgba(255, 143, 163, 0.35);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  text-align: center;
+}
+.btn:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 10px 22px rgba(255, 143, 163, 0.45); }
+.btn:active { transform: scale(0.96); }
+
+/* 결과 점수 카운트업 강조 */
+.result-score-large.bump { animation: scoreBump 0.5s cubic-bezier(0.34, 1.7, 0.5, 1); }
+
+/* ==========================================
+   광고/망치 부활 (게임오버 후 1회)
+   ========================================== */
+
+.revive-btn {
+  background: linear-gradient(135deg, #FFD86B 0%, #FF8FA3 100%);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 14px 20px;
+  position: relative;
+  animation: revivePulse 2.5s ease-in-out infinite;
+}
+.revive-btn .revive-note {
+  font-size: 11px;
+  font-weight: 500;
+  opacity: 0.92;
+  font-family: 'Gowun Dodum', sans-serif;
+}
+.revive-btn:disabled {
+  background: #E8E0D8;
+  color: #B8A898;
+  cursor: not-allowed;
+  animation: none;
+  transform: none !important;
+  box-shadow: var(--shadow-soft);
+}
+@keyframes revivePulse {
+  0%, 100% { box-shadow: 0 6px 18px rgba(255, 143, 163, 0.4); }
+  50%      { box-shadow: 0 10px 26px rgba(255, 200, 100, 0.55); }
+}
+
+/* 광고 모달 */
+.ad-modal { z-index: 200; background: rgba(20, 14, 8, 0.85); }
+.ad-frame {
+  background: white;
+  border-radius: 22px;
+  width: 100%;
+  max-width: 440px;
+  padding: 14px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+  transform: scale(0.92);
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.ad-modal.active .ad-frame { transform: scale(1); }
+.ad-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: 'Gowun Dodum', sans-serif;
+  font-size: 13px;
+  padding: 4px 8px 8px;
+  color: var(--ink-soft);
+}
+.ad-label {
+  background: #FFF0DC;
+  color: #B86A1C;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+}
+.ad-timer {
+  font-weight: 700;
+  color: var(--ink);
+  font-size: 14px;
+  min-width: 32px;
+  text-align: right;
+}
+.ad-progress {
+  height: 4px;
+  background: #F0E8E0;
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+.ad-progress-fill {
+  height: 100%;
+  width: 0;
+  background: linear-gradient(90deg, #FFD86B, #FF8FA3);
+  transition: width 0.1s linear;
+}
+.ad-slides {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 400 / 300;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #FFF8EC;
+}
+.ad-slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transform: scale(1.05);
+  transition: opacity 0.4s ease, transform 0.6s ease;
+}
+.ad-slide.active {
+  opacity: 1;
+  transform: scale(1);
+  animation: adKenBurns 1.6s ease-out;
+}
+.ad-slide svg { width: 100%; height: 100%; display: block; }
+@keyframes adKenBurns {
+  from { transform: scale(1.08); }
+  to   { transform: scale(1); }
+}
+.ad-footer {
+  text-align: center;
+  font-family: 'Gowun Dodum', sans-serif;
+  font-size: 12px;
+  color: var(--ink-soft);
+  padding: 12px 4px 4px;
+}
+
+/* 망치 모드 — 커서 + 배너 + 후광 */
+.hammer-banner {
+  position: fixed;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%) translateY(-100px);
+  background: white;
+  border-radius: 18px;
+  padding: 10px 18px 10px 12px;
+  box-shadow: 0 12px 32px rgba(255, 143, 163, 0.35);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 150;
+  pointer-events: none;
+  font-family: 'Gowun Dodum', sans-serif;
+  border: 2px solid #FFD86B;
+  opacity: 0;
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
+}
+.hammer-banner.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+.hammer-banner.bump .hammer-icon { animation: hammerSwing 0.32s ease-out; }
+.hammer-icon {
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  filter: drop-shadow(0 2px 4px rgba(120,80,50,0.2));
+}
+.hammer-icon svg { width: 100%; height: 100%; overflow: visible; }
+.hammer-text { display: flex; flex-direction: column; gap: 2px; line-height: 1.2; }
+.hammer-text strong { font-size: 14px; color: var(--accent); }
+.hammer-text span { font-size: 12px; color: var(--ink-soft); }
+.hammer-text em { color: var(--ink); font-weight: 700; font-style: normal; font-size: 14px; }
+
+@keyframes hammerSwing {
+  0%   { transform: rotate(0); }
+  40%  { transform: rotate(-30deg); }
+  70%  { transform: rotate(15deg); }
+  100% { transform: rotate(0); }
+}
+
+/* 망치 모드일 때 캔버스 커서 */
+.hammer-mode #game-canvas {
+  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 100 100"><g transform="rotate(-25 50 50)"><rect x="46" y="45" width="8" height="48" rx="2" fill="%23A66A48" stroke="%235A3A1C" stroke-width="2"/><rect x="20" y="20" width="60" height="32" rx="6" fill="%239A9A9A" stroke="%233A2418" stroke-width="2"/></g></svg>') 22 22, crosshair;
+}
+.hammer-mode .canvas-viewport-wrapper {
+  box-shadow: 0 0 0 3px #FFD86B, 0 0 24px rgba(255, 200, 100, 0.5);
+  animation: hammerGlow 1.4s ease-in-out infinite;
+}
+@keyframes hammerGlow {
+  0%, 100% { box-shadow: 0 0 0 3px #FFD86B, 0 0 24px rgba(255, 200, 100, 0.45); }
+  50%      { box-shadow: 0 0 0 3px #FF8FA3, 0 0 32px rgba(255, 143, 163, 0.6); }
+}
+
+.btn.ghost {
+  background: white;
+  color: var(--ink);
+  box-shadow: var(--shadow-soft);
+}
+.btn.ghost:hover { box-shadow: var(--shadow); }
+
+.card {
+  background: var(--card);
+  border-radius: 22px;
+  padding: 20px;
+  box-shadow: var(--shadow);
+}
+.card h3 {
+  font-family: 'Gowun Dodum', sans-serif;
+  font-size: 13px;
+  color: var(--ink-soft);
+  font-weight: 400;
+  letter-spacing: 0.05em;
+  margin-bottom: 6px;
+}
+
+/* ==========================================
+   메인 화면 (§5.1)
+   ========================================== */
+#main-screen {
+  text-align: center;
+  max-width: 480px;
+}
+.main-logo-area {
+  position: relative;
+  padding: 40px 0 20px;
+}
+.main-title {
+  font-family: 'Gowun Dodum', sans-serif;
+  font-size: 38px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  animation: titleBob 3.5s ease-in-out infinite;
+  display: inline-block;
+}
+.main-title span {
+  color: var(--accent);
+  display: inline-block;
+  animation: titleBob 3.5s ease-in-out infinite reverse;
+}
+@keyframes titleBob {
+  0%, 100% { transform: translateY(0) rotate(-1deg); }
+  50%      { transform: translateY(-6px) rotate(1deg); }
+}
+.main-subtitle {
+  font-size: 16px;
+  color: var(--ink-soft);
+  font-family: 'Gowun Dodum', sans-serif;
+}
+
+/* 떠다니는 모찌 친구들 */
+.floating-container {
+  position: relative;
+  height: 140px;
+  margin: 20px 0 30px;
+}
+.floating-mochi {
+  position: absolute;
+  width: 56px;
+  height: 56px;
+  filter: drop-shadow(0 4px 8px rgba(120, 80, 50, 0.12));
+  animation: float 4s ease-in-out infinite;
+}
+.floating-mochi svg { width: 100%; height: 100%; overflow: visible; }
+.floating-mochi:nth-child(1) { left: 12%; top: 20px; animation-delay: 0s; }
+.floating-mochi:nth-child(2) { left: 38%; top: 10px; width: 70px; height: 70px; animation-delay: 0.6s; }
+.floating-mochi:nth-child(3) { left: 68%; top: 30px; animation-delay: 1.2s; }
+.floating-mochi:nth-child(4) { left: 22%; top: 70px; width: 44px; height: 44px; animation-delay: 0.3s; }
+.floating-mochi:nth-child(5) { left: 78%; top: 80px; width: 50px; height: 50px; animation-delay: 0.9s; }
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(-2deg); }
+  50% { transform: translateY(-10px) rotate(2deg); }
+}
+
+.main-menu-box {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  background: var(--card);
+  padding: 30px;
+  border-radius: 24px;
+  box-shadow: var(--shadow);
+}
+
+/* ==========================================
+   게임 화면 (§5.2)
+   ========================================== */
+.game-title {
+  font-family: 'Gowun Dodum', sans-serif;
+  font-size: 26px;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 16px;
+}
+.game-title span { color: var(--accent); }
+
+.stage {
+  display: grid;
+  grid-template-columns: 240px 460px 240px;
+  gap: 24px;
+  align-items: start;
+  justify-content: center;
+}
+.side-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.score-num {
+  font-size: 40px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  display: inline-block;
+  transition: transform 0.18s cubic-bezier(0.34, 1.7, 0.5, 1);
+}
+.score-num.bump { animation: scoreBump 0.45s cubic-bezier(0.34, 1.7, 0.5, 1); }
+@keyframes scoreBump {
+  0%   { transform: scale(1); }
+  35%  { transform: scale(1.18) rotate(-2deg); }
+  60%  { transform: scale(0.96) rotate(1deg); }
+  100% { transform: scale(1); }
+}
+.best-num { font-size: 24px; font-weight: 700; color: var(--accent); display: inline-block; transition: transform 0.18s ease; }
+.best-num.bump { animation: scoreBump 0.45s cubic-bezier(0.34, 1.7, 0.5, 1); }
+
+.badge-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; min-height: 24px; }
+.badge {
+  background: var(--bg-2);
+  color: var(--ink);
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: 'Gowun Dodum', sans-serif;
+}
+
+.how-to-play {
+  font-family: 'Gowun Dodum', sans-serif;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--ink-soft);
+  margin-top: 6px;
+}
+
+/* 플레이 영역 */
+.play-container-wrap {
+  background: var(--card);
+  border-radius: 28px;
+  padding: 16px;
+  box-shadow: var(--shadow);
+}
+.preview-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 8px 12px;
+}
+.preview-bar .label {
+  font-family: 'Gowun Dodum', sans-serif;
+  color: var(--ink-soft);
+  font-size: 13px;
+}
+.preview-box {
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.preview-box svg {
+  width: 100%; height: 100%;
+  overflow: visible;
+  animation: previewBob 2.4s ease-in-out infinite;
+  filter: drop-shadow(0 4px 6px rgba(120, 80, 50, 0.15));
+}
+@keyframes previewBob {
+  0%, 100% { transform: translateY(0) rotate(-3deg); }
+  50%      { transform: translateY(-4px) rotate(3deg); }
+}
+.preview-empty {
+  font-size: 11px;
+  color: var(--ink-soft);
+  font-family: 'Gowun Dodum', sans-serif;
+}
+
+/* 사운드 토글 — 게임 화면 우상단 floating */
+.sound-toggle {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 38px;
+  height: 38px;
+  border: none;
+  border-radius: 50%;
+  background: white;
+  box-shadow: var(--shadow-soft);
+  cursor: pointer;
+  font-size: 18px;
+  z-index: 10;
+  transition: transform 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.sound-toggle:hover { transform: scale(1.1); }
+.sound-toggle:active { transform: scale(0.92); }
+.sound-toggle.muted { background: #FFEDED; }
+
+/* Canvas Viewport — 기획서 §5.2 컨테이너 420px, 비율 7:9 고정 */
+.canvas-viewport-wrapper {
+  position: relative;
+  width: 420px;
+  max-width: 100%;
+  aspect-ratio: 420 / 540;
+  margin: 0 auto;
+  background:
+    radial-gradient(circle at 50% 100%, #FFF5E8 0%, transparent 60%),
+    linear-gradient(to bottom, #FFFBF5 0%, #FFEEF5 100%);
+  border-radius: 22px;
+  overflow: hidden;
+  border: 2px dashed #F4D2DC;
+  box-shadow: inset 0 2px 0 rgba(255,255,255,0.6);
+}
+#game-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+  touch-action: none;
+}
+
+/* 콤보 토스트 — 화면 중앙 상단 통통 */
+.combo-toast {
+  position: absolute;
+  top: 28%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.6);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 5;
+  font-family: 'Gowun Dodum', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--accent);
+  text-shadow:
+    -2px -2px 0 #FFF, 2px -2px 0 #FFF,
+    -2px 2px 0 #FFF, 2px 2px 0 #FFF,
+    0 4px 12px rgba(255, 143, 163, 0.4);
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+.combo-toast.show {
+  animation: comboPop 1.1s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+@keyframes comboPop {
+  0%   { transform: translate(-50%, -10%) scale(0.5) rotate(-6deg); opacity: 0; }
+  25%  { transform: translate(-50%, -55%) scale(1.2) rotate(4deg); opacity: 1; }
+  45%  { transform: translate(-50%, -50%) scale(1) rotate(-2deg); opacity: 1; }
+  85%  { transform: translate(-50%, -55%) scale(1) rotate(0deg); opacity: 1; }
+  100% { transform: translate(-50%, -90%) scale(0.9) rotate(0deg); opacity: 0; }
+}
+
+/* 큰 토스트 — 3단 케이크 세리머니용 */
+.king-toast {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.3);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 5;
+  font-family: 'Gowun Dodum', sans-serif;
+  font-size: 34px;
+  font-weight: 700;
+  color: #FFD86B;
+  text-shadow:
+    -2px -2px 0 #FFF, 2px -2px 0 #FFF,
+    -2px 2px 0 #FFF, 2px 2px 0 #FFF,
+    0 6px 18px rgba(255, 200, 100, 0.6);
+  white-space: nowrap;
+}
+.king-toast.show {
+  animation: kingPop 1.8s cubic-bezier(0.34, 1.8, 0.64, 1) forwards;
+}
+@keyframes kingPop {
+  0%   { transform: translate(-50%, -50%) scale(0.3) rotate(-12deg); opacity: 0; }
+  20%  { transform: translate(-50%, -50%) scale(1.3) rotate(8deg); opacity: 1; }
+  35%  { transform: translate(-50%, -50%) scale(1) rotate(-4deg); opacity: 1; }
+  85%  { transform: translate(-50%, -50%) scale(1.05) rotate(0deg); opacity: 1; }
+  100% { transform: translate(-50%, -120%) scale(0.95); opacity: 0; }
+}
+
+/* 위험선 UI (Canvas 위 오버레이) */
+.danger-line-ui {
+  position: absolute;
+  top: 70px;
+  left: 0; right: 0;
+  border-top: 1px dashed var(--danger);
+  z-index: 3;
+  pointer-events: none;
+}
+.danger-line-ui::after {
+  content: 'GAME OVER LINE';
+  position: absolute;
+  right: 10px; top: -14px;
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+/* 도감 (Sweet Guide) */
+.sweet-guide-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 420px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+.sweet-guide-list::-webkit-scrollbar { width: 6px; }
+.sweet-guide-list::-webkit-scrollbar-thumb { background: #F0DCE8; border-radius: 3px; }
+
+.guide-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: 'Gowun Dodum', sans-serif;
+  font-size: 13px;
+}
+.guide-icon {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  filter: drop-shadow(0 2px 4px rgba(120, 80, 50, 0.1));
+  transition: transform 0.2s cubic-bezier(0.34, 1.7, 0.5, 1);
+}
+.guide-item:hover .guide-icon { transform: scale(1.18) rotate(-6deg); }
+.guide-icon svg { width: 100%; height: 100%; overflow: visible; }
+.guide-item {
+  transition: transform 0.2s ease;
+  padding: 2px 4px;
+  border-radius: 10px;
+}
+.guide-item:hover { background: var(--bg); }
+
+.side-panel-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ==========================================
+   모달 (§5.3 / §5.4)
+   ========================================== */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(74, 58, 44, 0.4);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  padding: 20px;
+}
+.modal-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+.modal-card {
+  background: var(--card);
+  border-radius: 26px;
+  padding: 32px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: var(--shadow);
+  text-align: center;
+  transform: scale(0.92);
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.modal-overlay.active .modal-card { transform: scale(1); }
+
+.modal-card h2 {
+  font-family: 'Gowun Dodum', sans-serif;
+  font-size: 24px;
+  margin-bottom: 12px;
+}
+.modal-card .modal-desc {
+  color: var(--ink-soft);
+  font-family: 'Gowun Dodum', sans-serif;
+  font-size: 14px;
+  margin-bottom: 24px;
+}
+
+/* 결과 화면 */
+.result-score-large {
+  font-size: 56px;
+  font-weight: 700;
+  color: var(--accent);
+  margin: 16px 0 8px;
+  letter-spacing: -0.02em;
+}
+.result-best-note {
+  font-size: 12px;
+  color: var(--ink-soft);
+  font-family: 'Gowun Dodum', sans-serif;
+  margin-bottom: 20px;
+}
+.rank-badge-box {
+  background: var(--bg);
+  padding: 14px;
+  border-radius: 16px;
+  font-family: 'Gowun Dodum', sans-serif;
+  font-weight: 700;
+  margin-bottom: 20px;
+  font-size: 15px;
+}
+.result-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 24px;
+}
+.result-stat {
+  background: var(--bg);
+  border-radius: 12px;
+  padding: 10px 6px;
+  text-align: center;
+}
+.result-stat-label {
+  font-size: 10px;
+  color: var(--ink-soft);
+  font-family: 'Gowun Dodum', sans-serif;
+  margin-bottom: 4px;
+}
+.result-stat-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.modal-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ==========================================
+   반응형 (§8.1)
+   ========================================== */
+@media (max-width: 1099px) {
+  /* 태블릿: 3컬럼 → 1컬럼, 사이드 패널 위/아래 */
+  body { padding: 16px; justify-content: flex-start; }
+  .stage {
+    grid-template-columns: minmax(0, 460px);
+    gap: 18px;
+  }
+  .side-panel { flex-direction: row; flex-wrap: wrap; width: 100%; }
+  .side-panel > .card { flex: 1 1 200px; }
+  .side-panel-buttons { flex-direction: row; flex: 1 1 100%; }
+  .side-panel-buttons .btn { flex: 1; }
+  .sweet-guide-list { max-height: 200px; }
+}
+
+@media (max-width: 480px) {
+  /* 모바일: 컨테이너 풀폭, aspect-ratio가 높이 자동 결정 (비율 7:9 유지) */
+  body { padding: 10px; }
+  .stage { grid-template-columns: 100%; width: 100%; }
+  .canvas-viewport-wrapper {
+    width: 100%;
+    max-width: 420px;
+    /* height는 aspect-ratio가 결정 — 명시적 height 지정 X */
+  }
+  .main-title { font-size: 30px; }
+  .game-title { font-size: 22px; }
+  .score-num { font-size: 32px; }
+  .modal-card { padding: 24px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
