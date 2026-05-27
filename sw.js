@@ -1,6 +1,6 @@
 // 스이카: 모찌&디저트 — 서비스 워커
 // 캐시 버전을 올리면 사용자 기기에서 자동 갱신
-const CACHE_NAME = 'suika-mochi-v1';
+const CACHE_NAME = 'suika-mochi-v2';
 
 // 캐시할 자산 (상대 경로 — GitHub Pages 서브 경로 호환)
 const ASSETS = [
@@ -53,6 +53,9 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const req = event.request;
   if (req.method !== 'GET') return;
+
+  // 분석 비콘은 캐시 우회 — 실시간 집계 보장
+  if (req.url.includes('cloudflareinsights.com')) return;
 
   event.respondWith(
     caches.match(req).then((cached) => {
