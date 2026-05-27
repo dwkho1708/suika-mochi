@@ -54,6 +54,9 @@ self.addEventListener('fetch', (event) => {
   const req = event.request;
   if (req.method !== 'GET') return;
 
+  // http(s)만 처리 — chrome-extension://, moz-extension:// 같은 스킴은 Cache API가 거부함
+  if (!req.url.startsWith('http')) return;
+
   // 분석 비콘은 캐시 우회 — 실시간 집계 보장
   if (req.url.includes('cloudflareinsights.com')) return;
 
