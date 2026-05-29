@@ -8,6 +8,16 @@
   let masterGain = null;
   let enabled = true;
 
+  // BGM 관련 상태 및 듀얼 채널 크로스페이드 엔진
+  let bgm1 = null;
+  let bgm2 = null;
+  let activeBgm = null;
+  let bgmInterval = null;
+  let bgmPlaying = false;
+  const BGM_SRC = './assets/Sunday_Paper.mp4';
+  const BGM_VOLUME = 0.22; // BGM 기본 볼륨 (효과음보다 약간 작게)
+  const FADE_TIME = 2000;  // 2초간 부드러운 크로스페이드
+
   function ensureCtx() {
     if (ctx) return ctx;
     const AC = window.AudioContext || window.webkitAudioContext;
@@ -26,6 +36,18 @@
   function setEnabled(on) {
     enabled = !!on;
     if (masterGain) masterGain.gain.value = on ? 0.35 : 0;
+    
+    // BGM 볼륨 동기화
+    if (on) {
+      if (bgmPlaying) {
+        if (activeBgm) activeBgm.volume = BGM_VOLUME;
+      } else {
+        startBGM();
+      }
+    } else {
+      if (bgm1) bgm1.volume = 0;
+      if (bgm2) bgm2.volume = 0;
+    }
   }
   function isEnabled() { return enabled; }
 
@@ -132,11 +154,109 @@
     setTimeout(() => tone(880, 0.3, { type: 'triangle', vol: 0.4 }), 260);
   }
 
+  // ==========================================
+  // BGM 듀얼 채널 크로스페이드 루프 구현
+  // ==========================================
+  function initBGM() {
+    if (bgm1) return;
+    bgm1 = new Audio(BGM_SRC);
+    bgm2 = new Audio(BGM_SRC);
+    bgm1.preload = 'auto';
+    bgm2.preload = 'auto';
+    bgm1.crossOrigin = 'anonymous';
+    bgm2.crossOrigin = 'anonymous';
+  }
+
+  function startBGM() {
+    initBGM();
+    if (!enabled || bgmPlaying) return;
+    bgmPlaying = true;
+
+    activeBgm = bgm1;
+    activeBgm.volume = BGM_VOLUME;
+    activeBgm.currentTime = 0;
+
+    playAudio(activeBgm);
+    startBgmMonitor();
+  }
+
+  function playAudio(audio) {
+    const p = audio.play();
+    if (p !== undefined) {
+      p.catch(e => console.warn('[Audio2] BGM 재생 대기 (인터랙션 필요):', e));
+    }
+  }
+
+  function startBgmMonitor() {
+    if (bgmInterval) clearInterval(bgmInterval);
+    bgmInterval = setInterval(() => {
+      if (!bgmPlaying || !activeBgm) return;
+
+      const dur = activeBgm.duration;
+      const curr = activeBgm.currentTime;
+
+      // 30초 음악이 끝나기 FADE_TIME (2초) 전에 다음 교차 트랙 재생 트리거
+      if (dur && dur > 0 && curr >= dur - (FADE_TIME / 1000)) {
+        crossfade();
+      }
+    }, 100);
+  }
+
+  function crossfade() {
+    const nextBgm = activeBgm === bgm1 ? bgm2 : bgm1;
+    const prevBgm = activeBgm;
+
+    nextBgm.currentTime = 0;
+    nextBgm.volume = 0;
+    playAudio(nextBgm);
+
+    activeBgm = nextBgm;
+
+    // 2초(FADE_TIME)간 볼륨 교차 전환
+    const steps = 20;
+    const intervalTime = FADE_TIME / steps;
+    let currentStep = 0;
+
+    const fadeTimer = setInterval(() => {
+      currentStep++;
+      const ratio = currentStep / steps;
+
+      if (!enabled) {
+        prevBgm.volume = 0;
+        nextBgm.volume = 0;
+        clearInterval(fadeTimer);
+        return;
+      }
+
+      prevBgm.volume = BGM_VOLUME * (1 - ratio);
+      nextBgm.volume = BGM_VOLUME * ratio;
+
+      if (currentStep >= steps) {
+        prevBgm.pause();
+        prevBgm.currentTime = 0;
+        clearInterval(fadeTimer);
+      }
+    }, intervalTime);
+  }
+
+  function stopBGM() {
+    bgmPlaying = false;
+    if (bgmInterval) clearInterval(bgmInterval);
+    if (bgm1) { bgm1.pause(); bgm1.currentTime = 0; }
+    if (bgm2) { bgm2.pause(); bgm2.currentTime = 0; }
+    activeBgm = null;
+  }
+
   window.Audio2 = {
     setEnabled, isEnabled,
     playMerge, playDrop, playCombo, playDanger, playGameOver, playKing,
     playSmash, playAdBell, playHammerReady,
-    // 첫 사용자 인터랙션에서 컨텍스트 만들기 (브라우저 정책)
-    unlock: () => { ensureCtx(); resumeIfSuspended(); },
+    startBGM, stopBGM,
+    // 첫 사용자 인터랙션에서 컨텍스트 만들기 및 BGM 재생 시작
+    unlock: () => { 
+      ensureCtx(); 
+      resumeIfSuspended(); 
+      startBGM();
+    },
   };
 })();

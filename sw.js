@@ -17,6 +17,7 @@ const ASSETS = [
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/apple-touch-icon.png',
+  './assets/Sunday_Paper.mp4',
   // 외부 자산 (CDN)
   'https://cdn.jsdelivr.net/npm/matter-js@0.20.0/build/matter.min.js',
   'https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Quicksand:wght@500;700&display=swap',
