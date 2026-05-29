@@ -20,6 +20,8 @@
   let onGameOverCb = null;
   let isOver = false;
   let isPaused = false;
+  let accumulator = 0;
+  const FIXED_DELTA = 1000 / 60; // 16.667ms (60fps 고정 타임스텝)
 
   function init() {
     // 기존 인스턴스 정리 (메인 ↔ 게임 왕복 시 누수 방지)
@@ -53,7 +55,15 @@
   // 외부 loop에서 매 프레임 호출. dt: 밀리초.
   function step(dt) {
     if (!engine || isPaused || isOver) return;
-    Matter.Engine.update(engine, Math.min(33, dt));
+    
+    // 백그라운드 전환 등 프레임 스파이크 발생 시 폭발 방지 (최대 100ms 제한)
+    accumulator += Math.min(100, dt);
+
+    // 고정된 16.667ms 단위로 물리 시뮬레이션을 돌려 일관된 물리를 보장하고 delta 경고 차단
+    while (accumulator >= FIXED_DELTA) {
+      Matter.Engine.update(engine, FIXED_DELTA);
+      accumulator -= FIXED_DELTA;
+    }
   }
 
   function reset() {
