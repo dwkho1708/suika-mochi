@@ -1,6 +1,6 @@
 // 스이카: 모찌&디저트 — 서비스 워커
 // 캐시 버전을 올리면 사용자 기기에서 자동 갱신
-const CACHE_NAME = 'suika-mochi-v2';
+const CACHE_NAME = 'suika-mochi-v3';
 
 // 캐시할 자산 (상대 경로 — GitHub Pages 서브 경로 호환)
 const ASSETS = [
@@ -17,7 +17,6 @@ const ASSETS = [
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/apple-touch-icon.png',
-  './assets/Sunday_Paper.mp4',
   // 외부 자산 (CDN)
   'https://cdn.jsdelivr.net/npm/matter-js@0.20.0/build/matter.min.js',
   'https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Quicksand:wght@500;700&display=swap',
@@ -60,6 +59,15 @@ self.addEventListener('fetch', (event) => {
 
   // 분석 비콘은 캐시 우회 — 실시간 집계 보장
   if (req.url.includes('cloudflareinsights.com')) return;
+
+  // 미디어 파일(mp4, mp3 등) 또는 Range 헤더가 포함된 요청은 캐시를 우회하여 네트워크로 서빙
+  // (Range Request는 Cache Storage와 충돌하여 오디오 재생 실패의 원인이 됨)
+  if (
+    req.headers.has('range') ||
+    req.url.includes('/assets/') && (req.url.endsWith('.mp4') || req.url.endsWith('.mp3'))
+  ) {
+    return;
+  }
 
   event.respondWith(
     caches.match(req).then((cached) => {
